@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b0b0d">
+<title>ZADX STORE | المتجر الرقمي</title>
+<style>
+:root{--bg:#09090b;--panel:#141417;--panel2:#1b1b20;--gold:#d7ad55;--gold2:#f0d28a;--muted:#a7a7ad;--line:#2b2b31;--white:#f7f5ef}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% -10%,#332713 0,transparent 32%),var(--bg);color:var(--white);font-family:system-ui,-apple-system,"Segoe UI",Arial,sans-serif}
+a{color:inherit;text-decoration:none}button,input,select{font:inherit}.wrap{max-width:1120px;margin:auto;padding:0 20px}
+header{position:sticky;top:0;z-index:5;background:#0b0b0deF;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-weight:900;letter-spacing:1px;font-size:22px}.brand span{color:var(--gold)}.navlinks{display:flex;gap:20px;color:var(--muted);font-size:14px}.navlinks a:hover{color:var(--gold)}.cartbtn,.btn{border:0;border-radius:12px;padding:11px 16px;background:var(--gold);color:#17130b;font-weight:800;cursor:pointer}.cartbtn{white-space:nowrap}.hero{padding:72px 0 48px;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}.eyebrow{color:var(--gold2);font-weight:700;font-size:13px;letter-spacing:1px}.hero h1{font-size:clamp(34px,6vw,62px);line-height:1.15;margin:14px 0}.hero h1 em{font-style:normal;color:var(--gold)}.hero p{color:var(--muted);line-height:1.9;max-width:610px}.hero-card{border:1px solid #6a542b;background:linear-gradient(145deg,#282116,#111114 70%);border-radius:24px;padding:28px;min-height:230px;display:flex;flex-direction:column;justify-content:space-between;box-shadow:0 20px 60px #0008}.hero-mark{font-size:50px;font-weight:950;color:var(--gold);letter-spacing:3px}.hero-card small{color:var(--muted)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}.stat{background:#ffffff08;border:1px solid #ffffff12;border-radius:13px;padding:12px}.stat b{display:block;color:var(--gold);font-size:19px}.stat span{font-size:12px;color:var(--muted)}
+section{padding:28px 0 42px}.section-head{display:flex;align-items:end;justify-content:space-between;gap:15px;margin-bottom:18px}.section-head h2{margin:0;font-size:26px}.section-head p{margin:5px 0 0;color:var(--muted);font-size:13px}.tools{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.tools input,.tools select,.field input,.field select{background:var(--panel);border:1px solid var(--line);color:var(--white);border-radius:11px;padding:12px;outline:none}.tools input{flex:1;min-width:180px}.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{background:var(--panel);border:1px solid var(--line);color:var(--muted);padding:9px 13px;border-radius:999px;cursor:pointer}.chip.active{background:#3b2d15;color:var(--gold2);border-color:#80632f}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.product{background:linear-gradient(180deg,#19191e,#111114);border:1px solid var(--line);border-radius:17px;padding:17px;display:flex;flex-direction:column;min-height:220px}.product-icon{height:48px;width:48px;border-radius:14px;background:#3b2d15;color:var(--gold2);display:grid;place-items:center;font-size:23px}.product h3{margin:13px 0 6px}.product p{color:var(--muted);font-size:13px;line-height:1.7;margin:0 0 16px;flex:1}.product-foot{display:flex;align-items:center;justify-content:space-between;gap:8px}.price{font-weight:900;color:var(--gold2)}.add{border:1px solid #80632f;background:#2b2111;color:var(--gold2);padding:9px 12px;border-radius:10px;cursor:pointer}
+.notice{border:1px solid #5d4b2b;background:#211b10;color:#e7d4a8;padding:14px 16px;border-radius:13px;font-size:13px;line-height:1.8}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.step{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:17px}.step b{color:var(--gold);font-size:19px}.step p{color:var(--muted);font-size:13px;line-height:1.7}
+footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-size:13px}.foot{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.tg{color:var(--gold2);font-weight:800}
+.modal{display:none;position:fixed;inset:0;background:#000b;z-index:10;padding:18px;overflow:auto}.modal.show{display:grid;place-items:center}.dialog{width:min(560px,100%);background:#151519;border:1px solid #49402e;border-radius:20px;padding:22px;max-height:92vh;overflow:auto}.dialog-head{display:flex;justify-content:space-between;align-items:center}.close{background:transparent;border:0;color:var(--muted);font-size:24px;cursor:pointer}.field{display:grid;gap:7px;margin:12px 0}.field label{font-size:13px;color:var(--muted)}.field input,.field select{width:100%}.summary{background:#0c0c0e;border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0;color:var(--muted);font-size:13px;line-height:1.8}.wide{width:100%;margin-top:8px}.empty{color:var(--muted);text-align:center;padding:20px}.admin{margin-top:12px;color:var(--muted);font-size:12px}
+@media(max-width:760px){.hero{grid-template-columns:1fr;padding-top:45px}.hero-card{min-height:190px}.grid{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}.steps{grid-template-columns:1fr}.stats{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:470px){.grid{grid-template-columns:1fr}.section-head{align-items:start;flex-direction:column}.nav{height:64px}.brand{font-size:19px}}
+
+.admin-entry{border:1px solid #6a542b;background:#17130d;color:var(--gold2);padding:10px 13px;border-radius:11px;cursor:pointer}
+.admin-panel{display:none;margin:18px 0 50px;border:1px solid #6a542b;border-radius:20px;background:#121215;padding:20px}
+.admin-panel.open{display:block}.admin-top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.admin-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0}
+.admin-stat{background:#1b1b20;border:1px solid var(--line);padding:14px;border-radius:13px}.admin-stat b{display:block;color:var(--gold2);font-size:22px}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:16px 0}.admin-tab{background:#202025;border:1px solid var(--line);color:var(--muted);padding:9px 13px;border-radius:10px;cursor:pointer}.admin-tab.active{color:var(--gold2);border-color:#80632f;background:#302514}
+.admin-view{display:none}.admin-view.active{display:block}.admin-form{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:12px 0}.admin-form .field{margin:0}.admin-table{width:100%;border-collapse:collapse;font-size:13px}.admin-table th,.admin-table td{padding:11px 8px;text-align:right;border-bottom:1px solid var(--line);vertical-align:top}.admin-table th{color:var(--gold2)}.admin-table td{color:#ddd}.admin-table select{max-width:150px;background:#202025;color:#fff;border:1px solid var(--line);padding:7px;border-radius:8px}
+.danger{background:#351b1b;color:#ffc3c3;border:1px solid #693333;padding:8px 10px;border-radius:8px;cursor:pointer}.subtle{color:var(--muted);font-size:12px;line-height:1.7}.admin-lock{max-width:420px;margin:18px auto;padding:18px;background:#1b1b20;border:1px solid var(--line);border-radius:14px}.admin-lock input{width:100%;background:#0e0e11;color:#fff;border:1px solid var(--line);border-radius:9px;padding:12px}
+@media(max-width:650px){.admin-grid{grid-template-columns:1fr}.admin-form{grid-template-columns:1fr}.admin-table{display:block;overflow-x:auto;white-space:nowrap}}
+
+</style>
+</head>
+<body>
+<header><div class="wrap nav">
+  <a class="brand" href="#"><span>ZADX</span> STORE</a>
+  <nav class="navlinks"><a href="#services">الخدمات</a><a href="#how">كيفاش تطلب</a><a href="#contact">الدعم</a><a href="#admin">لوحة المدير</a></nav>
+  <button class="cartbtn" onclick="openCart()">السلة (<span id="cartCount">0</span>)</button>
+</div></header>
+<main class="wrap">
+  <div class="hero">
+    <div>
+      <div class="eyebrow">YOUR DIGITAL MARKETPLACE</div>
+      <h1>كل خدماتك الرقمية<br><em>في مكان واحد.</em></h1>
+      <p>مرحبا بيك في ZADX STORE. اكتشف البوتات والخدمات الرقمية، اختار الخدمة المناسبة وابعث طلبك بسهولة. كل طلب يتسجل وتقدر تتابع حالتو.</p>
+      <a class="btn" href="#services" style="display:inline-block;margin-top:10px">اكتشف الخدمات</a>
+      <div class="stats">
+        <div class="stat"><b>24/7</b><span>استقبال الطلبات</span></div>
+        <div class="stat"><b>3</b><span>لغات للواجهة لاحقاً</span></div>
+        <div class="stat"><b>1:1</b><span>متابعة الطلب</span></div>
+      </div>
+    </div>
+    <div class="hero-card">
+      <div class="hero-mark">ZADX</div>
+      <div><b style="font-size:22px">STORE</b><br><small>بوتات • أدوات • خدمات تسويق رقمي</small></div>
+      <small>واجهة تجريبية قابلة للتطوير</small>
+    </div>
+  </div>
+
+  <section id="services">
+    <div class="section-head"><div><h2>الخدمات والمنتجات</h2><p>اختار القسم وابحث على الخدمة اللي تحتاجها.</p></div></div>
+    <div class="tools"><input id="search" placeholder="ابحث عن خدمة..." oninput="renderProducts()"></div>
+    <div class="chips" id="chips"></div>
+    <div class="grid" id="products"></div>
+  </section>
+
+  <section id="how">
+    <div class="section-head"><div><h2>كيفاش تطلب؟</h2><p>خطوات بسيطة وواضحة.</p></div></div>
+    <div class="steps">
+      <div class="step"><b>01</b><h3>اختار الخدمة</h3><p>زيد المنتجات للسلة وحدد الكمية أو التفاصيل المطلوبة.</p></div>
+      <div class="step"><b>02</b><h3>ابعث الطلب</h3><p>اختار طريقة الدفع وابعث تفاصيل الطلب للمراجعة.</p></div>
+      <div class="step"><b>03</b><h3>تأكيد ومتابعة</h3><p>يتم التحقق من الدفع يدوياً قبل تنفيذ الطلب، وتوصلك الحالة عبر الدعم.</p></div>
+    </div>
+    <div class="notice" style="margin-top:16px">ملاحظة: خدمات نمو الحسابات تكون عبر التسويق والإعلانات والمحتوى الحقيقي فقط، وليس المتابعين الوهميين أو التفاعل المصطنع. لا تشارك كلمة سر حساباتك مع أي شخص.</div>
+  </section>
+  <section id="contact">
+    <div class="section-head"><div><h2>الدعم والاتصال</h2><p>عندك سؤال على طلبك؟ تواصل معانا.</p></div></div>
+    <div class="product" style="min-height:auto"><div class="product-icon">✉</div><h3>Telegram Support</h3><p>الدعم والطلبات عبر حساب المتجر.</p><a class="btn" href="https://t.me/ZADX_PRO" target="_blank" rel="noopener">تواصل مع @ZADX_PRO</a></div>
+  </section>
+
+  <section id="admin">
+    <div class="section-head"><div><h2>لوحة المدير</h2><p>إدارة الخدمات والطلبات في نسخة تجريبية محلية.</p></div>
+      <button class="admin-entry" onclick="toggleAdmin()">فتح لوحة المدير</button>
+    </div>
+    <div class="admin-panel" id="adminPanel">
+      <div class="admin-top"><div><div class="eyebrow">ZADX STORE / ADMIN</div><h2 style="margin:6px 0">إدارة المتجر</h2></div><button class="danger" onclick="adminLogout()">قفل اللوحة</button></div>
+      <div class="notice">تنبيه أمان: هذه لوحة تجريبية داخل المتصفح فقط. لا تستعملها لحفظ بيانات حقيقية أو كلمات مرور أو معلومات دفع. الحماية الفعلية تتطلب خادماً وتسجيل دخول آمن.</div>
+      <div id="adminLogin" class="admin-lock">
+        <h3>دخول المدير التجريبي</h3>
+        <p class="subtle">أنشئ رمزاً محلياً لهذه التجربة. هذا الرمز ليس حماية حقيقية ويمكن تجاوزه تقنياً.</p>
+        <div class="field"><label>رمز الدخول التجريبي</label><input id="adminPin" type="password" placeholder="أدخل الرمز الذي اخترته"></div>
+        <button class="btn wide" onclick="adminLogin()">دخول</button>
+        <p class="subtle">أول مرة: أدخل رمزاً من اختيارك وسيُحفظ في هذا المتصفح فقط.</p>
+      </div>
+      <div id="adminContent" style="display:none">
+        <div class="admin-grid">
+          <div class="admin-stat"><span class="subtle">عدد الخدمات</span><b id="statProducts">0</b></div>
+          <div class="admin-stat"><span class="subtle">عدد الطلبات المسجلة</span><b id="statOrders">0</b></div>
+          <div class="admin-stat"><span class="subtle">طلبات قيد المراجعة</span><b id="statPending">0</b></div>
+        </div>
+        <div class="admin-tabs">
+          <button class="admin-tab active" onclick="showAdminTab('productsTab',this)">الخدمات</button>
+          <button class="admin-tab" onclick="showAdminTab('ordersTab',this)">الطلبات</button>
+          <button class="admin-tab" onclick="showAdminTab('settingsTab',this)">إعدادات المتجر</button>
+        </div>
+        <div class="admin-view active" id="productsTab">
+          <h3>إضافة خدمة جديدة</h3>
+          <div class="admin-form">
+            <div class="field"><label>اسم الخدمة</label><input id="newName" placeholder="مثال: بوت Telegram"></div>
+            <div class="field"><label>القسم</label><select id="newCat"><option>بوتات</option><option>تسويق رقمي</option><option>خدمات رقمية</option></select></div>
+            <div class="field"><label>وصف الخدمة</label><input id="newDesc" placeholder="وصف مختصر"></div>
+            <div class="field"><label>السعر المعروض</label><input id="newPrice" placeholder="مثال: حسب الطلب"></div>
+          </div>
+          <button class="btn" onclick="adminAddProduct()">إضافة الخدمة</button>
+          <h3 style="margin-top:22px">الخدمات الحالية</h3><div id="adminProducts"></div>
+        </div>
+        <div class="admin-view" id="ordersTab">
+          <h3>إدارة الطلبات</h3><p class="subtle">الطلبات التجريبية التي يرسلها الزبائن من هذا المتصفح فقط ستظهر هنا. لا تصل الطلبات من أجهزة أخرى دون خادم وقاعدة بيانات.</p>
+          <div id="adminOrders"></div>
+        </div>
+        <div class="admin-view" id="settingsTab">
+          <h3>إعدادات التواصل</h3>
+          <div class="field"><label>حساب Telegram للدعم</label><input id="adminTelegram" value="@ZADX_PRO"></div>
+          <button class="btn" onclick="saveAdminSettings()">حفظ إعدادات العرض</button>
+          <p class="subtle">لا تُدخل بيانات سرية أو أرقام حسابات بنكية في هذه النسخة. إعدادات الدفع الفعلية تُضاف لاحقاً عبر خادم آمن.</p>
+          <div class="notice" style="margin-top:14px">حالة النسخة الحالية: تحفظ الخدمات والطلبات على نفس المتصفح فقط. لجعلها مشتركة بين الزبائن وأجهزتك، نحتاج نشر الموقع وربطه بقاعدة بيانات وخادم آمن ومزود دفع رسمي. لا تضع أسرار API أو كلمات مرور داخل ملف HTML.</div>
+          <div style="margin-top:16px"><button class="danger" onclick="resetDemoData()">إعادة ضبط بيانات التجربة</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+<footer><div class="wrap foot"><div><b style="color:var(--gold)">ZADX STORE</b><br>متجرك للخدمات الرقمية.</div><div>© 2026 ZADX STORE — جميع الحقوق محفوظة.</div></div></footer>
+
+<div class="modal" id="cartModal" onclick="if(event.target===this)closeCart()">
+ <div class="dialog">
+  <div class="dialog-head"><h2>سلة الطلبات</h2><button class="close" onclick="closeCart()">×</button></div>
+  <div id="cartItems"></div>
+  <div class="field"><label>الاسم أو اسم المستخدم</label><input id="customer" placeholder="اكتب اسمك"></div>
+  <div class="field"><label>طريقة الدفع المفضلة</label><select id="payment"><option>CCP / BaridiMob</option><option>USDT</option><option>Visa</option></select></div>
+  <div class="summary" id="total">السلة فارغة حالياً.</div>
+  <div class="notice">الدفع غير مفعّل آلياً في هذه النسخة. لا ترسل أي مبلغ حتى تتأكد من تفاصيل الطلب ومعلومات الدفع عبر قناة الدعم الرسمية.</div>
+  <button class="btn wide" onclick="sendOrder()">إرسال الطلب عبر Telegram</button>
+  <div class="admin">نسخة أولية: الطلب يفتح رسالة جاهزة في Telegram، ولا تحفظ بيانات الزبائن على خادم.</div>
+ </div>
+</div>
+<script>
+const products=[
+ {id:1,cat:"بوتات",icon:"🤖",name:"بوت Telegram مخصص",desc:"بوت للردود والتنظيم والمهام المسموح بها، حسب المواصفات.",price:"حسب الطلب"},
+ {id:2,cat:"بوتات",icon:"⚙️",name:"أداة Python",desc:"سكريبت أو أداة أتمتة لمهام مشروعة وبمواصفات واضحة.",price:"حسب الطلب"},
+ {id:3,cat:"بوتات",icon:"💬",name:"بوت Discord",desc:"بوت إدارة مجتمع وأوامر مساعدة لسيرفر Discord.",price:"حسب الطلب"},
+ {id:4,cat:"تسويق رقمي",icon:"📣",name:"حملة ترويج Instagram",desc:"خطة محتوى وترويج حقيقي للوصول إلى جمهور مهتم.",price:"حسب الطلب"},
+ {id:5,cat:"تسويق رقمي",icon:"🎬",name:"ترويج TikTok",desc:"تحسين المحتوى وأفكار فيديوهات وحملة وصول حقيقية.",price:"حسب الطلب"},
+ {id:6,cat:"تسويق رقمي",icon:"▶️",name:"تطوير قناة YouTube",desc:"تحسين العناوين والوصف وخطة نشر وتحليل الأداء.",price:"حسب الطلب"},
+ {id:7,cat:"خدمات رقمية",icon:"🎨",name:"تصميم رقمي",desc:"تصميم منشورات أو صور تعريفية لمشروعك.",price:"حسب الطلب"},
+ {id:8,cat:"خدمات رقمية",icon:"🛠️",name:"خدمة مخصصة",desc:"اشرح المطلوب ونراجع إمكانية تنفيذه.",price:"حسب الطلب"}
+];
+let category="الكل",cart=[];
+let demoOrders=JSON.parse(localStorage.getItem("zadx_demo_orders")||"[]");
+try {
+ const savedCatalog=JSON.parse(localStorage.getItem("zadx_demo_products")||"null");
+ if(Array.isArray(savedCatalog)) products.splice(0,products.length,...savedCatalog);
+} catch(e) {}
+let adminUnlocked=false;
+const cats=["الكل","بوتات","تسويق رقمي","خدمات رقمية"];
+function renderChips(){document.getElementById("chips").innerHTML=cats.map(c=>`<button class="chip ${category===c?'active':''}" onclick="category='${c}';renderChips();renderProducts()">${c}</button>`).join("")}
+function renderProducts(){
+ const q=document.getElementById("search").value.trim().toLowerCase();
+ const list=products.filter(p=>(category==="الكل"||p.cat===category)&&(`${p.name} ${p.desc} ${p.cat}`).toLowerCase().includes(q));
+ document.getElementById("products").innerHTML=list.length?list.map(p=>`<article class="product"><div class="product-icon">${p.icon}</div><h3>${p.name}</h3><p>${p.desc}</p><div class="product-foot"><span class="price">${p.price}</span><button class="add" onclick="addToCart(${p.id})">+ أضف للسلة</button></div></article>`).join(""):'<div class="empty">ما لقيناش خدمات بهذا الاسم.</div>';
+}
+function addToCart(id){const p=products.find(x=>x.id===id);const found=cart.find(x=>x.id===id);if(found)found.qty++;else cart.push({...p,qty:1});updateCart();openCart()}
+function updateCart(){document.getElementById("cartCount").textContent=cart.reduce((a,x)=>a+x.qty,0);const box=document.getElementById("cartItems");box.innerHTML=cart.length?cart.map(x=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${x.icon} ${x.name}</b><div style="color:var(--muted);font-size:12px">${x.cat} · الكمية: ${x.qty}</div></div><button class="add" onclick="removeItem(${x.id})">حذف</button></div>`).join(""):'<div class="empty">السلة فارغة.</div>';document.getElementById("total").textContent=cart.length?"الأسعار النهائية تتحدد بعد مراجعة تفاصيل الخدمة والتأكيد مع الدعم.":"السلة فارغة حالياً."}
+function removeItem(id){cart=cart.filter(x=>x.id!==id);updateCart()}
+function openCart(){document.getElementById("cartModal").classList.add("show");updateCart()}
+function closeCart(){document.getElementById("cartModal").classList.remove("show")}
+function sendOrder(){
+ if(!cart.length){alert("زيد خدمة للسلة أولاً.");return}
+ const customer=document.getElementById("customer").value.trim();if(!customer){alert("اكتب اسمك أو اسم المستخدم.");return}
+ const payment=document.getElementById("payment").value;
+ const lines=cart.map(x=>`- ${x.name} × ${x.qty}`).join("\n");
+ const msg=`طلب جديد من ZADX STORE\nالزبون: ${customer}\nطريقة الدفع المفضلة: ${payment}\nالخدمات:\n${lines}\n\nالرجاء تأكيد السعر وتفاصيل الدفع قبل أي تحويل.`;
+ demoOrders.unshift({id:"ZX"+Date.now().toString().slice(-7),customer,payment,items:cart.map(x=>({name:x.name,qty:x.qty})),status:"جديد",date:new Date().toLocaleString("ar-DZ")});
+ localStorage.setItem("zadx_demo_orders",JSON.stringify(demoOrders));renderAdmin();
+ window.open("https://t.me/ZADX_PRO?text="+encodeURIComponent(msg),"_blank","noopener");
+}
+renderChips();renderProducts();updateCart();
+
+function toggleAdmin(){document.getElementById("adminPanel").classList.toggle("open")}
+function adminLogin(){
+ const pin=document.getElementById("adminPin").value;if(!pin){alert("أدخل رمزاً للتجربة.");return}
+ let saved=localStorage.getItem("zadx_demo_pin");
+ if(!saved){localStorage.setItem("zadx_demo_pin",pin);saved=pin;alert("تم إنشاء رمز تجريبي على هذا المتصفح.")}
+ if(pin!==saved){alert("الرمز غير صحيح.");return}
+ adminUnlocked=true;document.getElementById("adminLogin").style.display="none";document.getElementById("adminContent").style.display="block";renderAdmin();
+}
+function adminLogout(){adminUnlocked=false;document.getElementById("adminPin").value="";document.getElementById("adminLogin").style.display="block";document.getElementById("adminContent").style.display="none"}
+function showAdminTab(id,btn){document.querySelectorAll(".admin-view").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".admin-tab").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");btn.classList.add("active")}
+function adminAddProduct(){
+ if(!adminUnlocked)return;const name=document.getElementById("newName").value.trim(),desc=document.getElementById("newDesc").value.trim(),cat=document.getElementById("newCat").value,price=document.getElementById("newPrice").value.trim()||"حسب الطلب";
+ if(!name||!desc){alert("اكتب اسم الخدمة ووصفها.");return}
+ products.push({id:Math.max(0,...products.map(x=>x.id))+1,cat,icon:"✨",name,desc,price});localStorage.setItem("zadx_demo_products",JSON.stringify(products));
+ document.getElementById("newName").value="";document.getElementById("newDesc").value="";document.getElementById("newPrice").value="";
+ renderProducts();renderAdmin();
+}
+function adminDeleteProduct(id){if(!confirm("تحذف هذه الخدمة من العرض؟"))return;products=products.filter(x=>x.id!==id);localStorage.setItem("zadx_demo_products",JSON.stringify(products));renderProducts();renderAdmin()}
+function adminEditProduct(id){
+ const p=products.find(x=>x.id===id);if(!p)return;
+ const name=prompt("اسم الخدمة:",p.name);if(name===null)return;
+ const desc=prompt("وصف الخدمة:",p.desc);if(desc===null)return;
+ const price=prompt("السعر المعروض:",p.price);if(price===null)return;
+ const cat=prompt("القسم (بوتات / تسويق رقمي / خدمات رقمية):",p.cat);if(cat===null)return;
+ p.name=name.trim()||p.name;p.desc=desc.trim()||p.desc;p.price=price.trim()||p.price;
+ if(["بوتات","تسويق رقمي","خدمات رقمية"].includes(cat.trim()))p.cat=cat.trim();
+ localStorage.setItem("zadx_demo_products",JSON.stringify(products));renderProducts();renderAdmin();
+}
+function renderAdmin(){
+ if(!adminUnlocked)return;
+ document.getElementById("statProducts").textContent=products.length;
+ document.getElementById("statOrders").textContent=demoOrders.length;
+ document.getElementById("statPending").textContent=demoOrders.filter(x=>x.status==="جديد"||x.status==="قيد المراجعة").length;
+ document.getElementById("adminProducts").innerHTML=products.length?`<table class="admin-table"><thead><tr><th>الخدمة</th><th>القسم</th><th>السعر</th><th>إجراء</th></tr></thead><tbody>${products.map(p=>`<tr><td>${p.name}</td><td>${p.cat}</td><td>${p.price}</td><td><button class="add" onclick="adminEditProduct(${p.id})">تعديل</button> <button class="danger" onclick="adminDeleteProduct(${p.id})">حذف</button></td></tr>`).join("")}</tbody></table>`:'<p class="empty">لا توجد خدمات.</p>';
+ document.getElementById("adminOrders").innerHTML=demoOrders.length?`<table class="admin-table"><thead><tr><th>رقم الطلب</th><th>الزبون</th><th>التفاصيل</th><th>الحالة</th></tr></thead><tbody>${demoOrders.map((o,i)=>`<tr><td>${o.id}<br><span class="subtle">${o.date}</span></td><td>${o.customer}<br><span class="subtle">${o.payment}</span></td><td>${o.items.map(x=>x.name+" × "+x.qty).join("<br>")}</td><td><select onchange="changeOrderStatus(${i},this.value)">${["جديد","قيد المراجعة","تم تأكيد الدفع","قيد التنفيذ","مكتمل","مرفوض"].map(s=>`<option ${o.status===s?"selected":""}>${s}</option>`).join("")}</select></td></tr>`).join("")}</tbody></table>`:'<p class="empty">ما كاين حتى طلب محلي حالياً.</p>';
+}
+function changeOrderStatus(i,status){demoOrders[i].status=status;localStorage.setItem("zadx_demo_orders",JSON.stringify(demoOrders));renderAdmin()}
+function saveAdminSettings(){const tg=document.getElementById("adminTelegram").value.trim().replace(/^@/,"");if(!tg){alert("أدخل اسم مستخدم Telegram.");return}document.querySelectorAll('a[href*="t.me/ZADX_PRO"]').forEach(a=>{a.href="https://t.me/"+tg});localStorage.setItem("zadx_demo_telegram",tg);alert("تم تحديث رابط الدعم في هذه النسخة.");}
+function resetDemoData(){if(!confirm("هذا يحذف الطلبات والرمز التجريبي المحفوظين في هذا المتصفح. تواصل؟"))return;localStorage.removeItem("zadx_demo_orders");localStorage.removeItem("zadx_demo_pin");demoOrders=[];adminLogout();alert("تمت إعادة ضبط بيانات التجربة.");}
+
+</script>
+</body>
+</html>
