@@ -58,9 +58,7 @@ footer{text-align:center;padding:30px;color:#777;font-size:13px}
 <h1>مرحبا بك في <span style="color:#e6bd64">ZADX STORE</span></h1>
 <p>اكتشف خدماتنا الرقمية وبوتاتنا واطلب خدمتك بسهولة وأمان.</p>
 </div>
-
 <div class="status" id="connection">جاري الاتصال بقاعدة البيانات...</div>
-
 <h2>منتجاتنا وخدماتنا</h2>
 <div class="products" id="products">
 <p>جاري تحميل المنتجات...</p>
@@ -259,7 +257,7 @@ button.textContent="جاري إرسال الطلب...";
 
 try{
 const {data,error}=await db.functions.invoke(
-"send-telegram-order",
+"send_telegram_order",
 {
 body:{message}
 }
