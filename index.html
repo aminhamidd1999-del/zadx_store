@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -141,8 +142,7 @@ const status=document.getElementById("connection");
 try{
 const {data,error}=await db
 .from("products")
-.select("id,name,description,price,icon")
-.limit(4);
+.select("id,name,description,price,icon");
 
 if(error)throw error;
 
