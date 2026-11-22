@@ -94,7 +94,7 @@ footer{text-align:center;padding:30px;color:#777;font-size:13px}
 <strong style="color:#e6bd64">00799999004313678088</strong>
 </div>
 <p class="small">يتم تأكيد الطلب والدفع يدوياً عبر الدعم.</p>
-<button class="btn" onclick="sendOrder()">إرسال الطلب عبر Telegram</button>
+<button class="btn" id="sendOrderBtn" onclick="sendOrder()">إرسال الطلب عبر Telegram</button>
 <button class="btn dark" onclick="showSection('cart')">رجوع للسلة</button>
 </div>
 </section>
@@ -223,7 +223,7 @@ updateCount();
 renderCart();
 }
 
-function sendOrder(){
+async function sendOrder(){
 if(!cart.length){
 alert("السلة فارغة!");
 return;
@@ -231,6 +231,7 @@ return;
 
 const name=document.getElementById("customer").value.trim();
 const phone=document.getElementById("phone").value.trim();
+const button=document.getElementById("sendOrderBtn");
 
 if(!name||!phone){
 alert("أدخل اسمك ورقم هاتفك.");
@@ -239,20 +240,55 @@ return;
 
 const total=cart.reduce((s,p)=>s+Number(p.price)*p.quantity,0);
 
-let message="طلب جديد - ZADX STORE\n";
+let message="🛒 طلب جديد - ZADX STORE\n";
 message+="الاسم: "+name+"\n";
 message+="الهاتف: "+phone+"\n";
 message+="الدفع: "+document.getElementById("payment").value+"\n";
 message+="المنتجات:\n";
 
 cart.forEach(p=>{
-message+=p.name+" × "+p.quantity+" = "+(Number(p.price)*p.quantity)+" DA\n";
+message+=p.name+" × "+p.quantity+" = "+
+(Number(p.price)*p.quantity)+" DA\n";
 });
 
 message+="المجموع: "+total+" DA\n";
 message+="ملاحظات: "+document.getElementById("note").value;
 
-window.open("https://t.me/ZADX_PRO?text="+encodeURIComponent(message),"_blank");
+button.disabled=true;
+button.textContent="جاري إرسال الطلب...";
+
+try{
+const {data,error}=await db.functions.invoke(
+"send-telegram-order",
+{
+body:{message}
+}
+);
+
+if(error)throw error;
+if(!data||!data.success){
+throw new Error(data?.error||"لم يتم تأكيد إرسال الطلب");
+}
+
+alert("تم إرسال طلبك بنجاح إلى ZADX STORE ✓");
+
+cart=[];
+updateCount();
+renderCart();
+
+document.getElementById("customer").value="";
+document.getElementById("phone").value="";
+document.getElementById("note").value="";
+showSection("home");
+
+}catch(error){
+console.error("Telegram order error:",error);
+alert("فشل إرسال الطلب: "+(error.message||"خطأ غير معروف"));
+
+}finally{
+button.disabled=false;
+button.textContent="إرسال الطلب عبر Telegram";
+}
 }
 
 loadProducts();
