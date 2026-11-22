@@ -24,7 +24,7 @@ header{padding:18px 15px;background:#111;border-bottom:1px solid #b58b35;display
 .section{padding:24px 15px}
 .section h2,.cartbox h2,.admin-panel h2{color:#e5b84c}
 .products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-.product,.admin-panel,.login-panel,.cartbox{background:#171717;border:1px solid #49391f;border-radius:13px;padding:15px}
+.product,.admin-panel,.login-panel,.cartbox,.stat-card,.order-card{background:#171717;border:1px solid #49391f;border-radius:13px;padding:15px}
 .symbol{font-size:30px;margin-bottom:10px}
 .product h3{font-size:16px}
 .product p{font-size:13px;color:#aaa;line-height:1.6;min-height:40px}
@@ -45,6 +45,17 @@ label{color:#ddd;font-size:14px}
 .status{color:#aaa;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
 footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 .empty{color:#999}
+.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
+.stat-card{text-align:center}
+.stat-card p{color:#aaa;font-size:13px}
+.stat-card h2{font-size:27px;margin:8px 0;color:#e5b84c}
+.order-card{margin:10px 0}
+.order-card p{color:#ccc;line-height:1.8;font-size:13px}
+.order-actions{display:flex;gap:8px;margin-top:10px}
+.order-actions button{flex:1;padding:10px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}
+.confirm-btn{background:#287b4b;color:white}
+.order-pending{color:#e5b84c}
+.order-confirmed{color:#54c77d}
 @media(max-width:360px){.products{grid-template-columns:1fr}}
 </style>
 </head>
@@ -78,7 +89,48 @@ footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 
 <section class="admin-panel" id="adminPanel" hidden>
 <h2>⚙️ لوحة تحكم ZADX ADMIN</h2>
-<p>إدارة المنتجات الرقمية</p>
+
+<!-- الإحصائيات الخاصة بالأدمن -->
+<section id="statsPanel">
+<h3 style="color:#e5b84c">📊 إحصائيات المتجر الخاصة</h3>
+
+<div class="stats-grid">
+<div class="stat-card">
+<p>👁️ الزوار المسجلون</p>
+<h2 id="visitorCount">0</h2>
+</div>
+
+<div class="stat-card">
+<p>🛒 إجمالي الطلبات</p>
+<h2 id="orderCount">0</h2>
+</div>
+
+<div class="stat-card">
+<p>💰 المشتريات المؤكدة</p>
+<h2 id="confirmedCount">0</h2>
+</div>
+
+<div class="stat-card">
+<p>⏳ الطلبات المعلقة</p>
+<h2 id="pendingCount">0</h2>
+</div>
+</div>
+
+<button class="btn secondary" type="button" id="refreshStats">
+🔄 تحديث الإحصائيات
+</button>
+
+<h3 style="color:#e5b84c">📦 الطلبات الواردة</h3>
+<div id="ordersList">
+<p class="empty">جاري تحميل الطلبات...</p>
+</div>
+
+<p class="status" id="statsStatus"></p>
+</section>
+
+<hr style="border-color:#49391f;margin:25px 0">
+
+<h3 style="color:#e5b84c">إدارة المنتجات</h3>
 
 <form id="productForm">
 <label>اسم المنتج</label>
@@ -113,7 +165,9 @@ footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 
 <section class="cartbox">
 <h2>🛒 سلة الطلبات</h2>
-<div id="cartItems"><p class="empty">السلة فارغة حالياً</p></div>
+<div id="cartItems">
+<p class="empty">السلة فارغة حالياً</p>
+</div>
 <button class="btn" id="sendOrder">إرسال الطلب عبر تيليغرام</button>
 </section>
 
@@ -124,11 +178,15 @@ footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
 const SUPABASE_URL="https://iyxxesftwprdrbxspdfb.supabase.co";
 const SUPABASE_KEY="sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
 
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const db=window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
 
 let products=[];
 let cart=[];
@@ -146,6 +204,40 @@ const el=document.createElement(tag);
 if(text!==undefined)el.textContent=text;
 if(className)el.className=className;
 return el;
+}
+
+// إنشاء معرّف الزائر
+function getVisitorId(){
+let id;
+
+try{
+id=localStorage.getItem("zadx_visitor_id");
+
+if(!id){
+id=crypto.randomUUID();
+localStorage.setItem("zadx_visitor_id",id);
+}
+
+}catch(error){
+id=crypto.randomUUID();
+}
+
+return id;
+}
+
+// تسجيل زيارة واحدة لكل متصفح
+async function recordVisit(){
+try{
+const {error}=await db
+.from("store_visits")
+.insert({id:getVisitorId()});
+
+if(error && error.code!=="23505"){
+console.error("Visit error:",error);
+}
+}catch(error){
+console.error("Visit error:",error);
+}
 }
 
 // تحميل المنتجات
@@ -166,8 +258,10 @@ price:p.price??"حسب الطلب",
 icon:p.icon||"⭐"
 }));
 
-setStatus("connectionStatus",
-"متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+products.length);
+setStatus(
+"connectionStatus",
+"متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+products.length
+);
 
 showProducts();
 
@@ -224,11 +318,12 @@ return;
 
 const {data,error}=await db.rpc("is_store_admin");
 
-isAdmin=!error&&data===true;
+isAdmin=!error && data===true;
 updateAdminUI();
 
 if(isAdmin){
 setStatus("adminStatus","تم تسجيل الدخول كأدمن ✓");
+await loadStats();
 }else{
 setStatus("loginStatus","هذا الحساب ليس لديه صلاحية الإدارة.");
 }
@@ -245,6 +340,7 @@ showProducts();
 $("adminToggle").addEventListener("click",()=>{
 if(isAdmin){
 $("adminPanel").hidden=!$("adminPanel").hidden;
+if(!$("adminPanel").hidden)loadStats();
 }else{
 $("loginPanel").hidden=!$("loginPanel").hidden;
 }
@@ -284,6 +380,145 @@ updateAdminUI();
 setStatus("loginStatus","تم تسجيل الخروج.");
 });
 
+// تحميل إحصائيات الأدمن
+async function loadStats(){
+
+if(!isAdmin)return;
+
+setStatus("statsStatus","جاري تحميل الإحصائيات...");
+
+try{
+
+const [visitsResult,ordersResult]=await Promise.all([
+
+db.from("store_visits")
+.select("id",{count:"exact",head:true}),
+
+db.from("store_orders")
+.select("id,items,status,created_at")
+.order("created_at",{ascending:false})
+
+]);
+
+if(visitsResult.error)throw visitsResult.error;
+if(ordersResult.error)throw ordersResult.error;
+
+const visits=visitsResult.count||0;
+const orders=ordersResult.data||[];
+
+const confirmed=orders.filter(o=>o.status==="confirmed").length;
+const pending=orders.filter(o=>o.status==="pending").length;
+
+$("visitorCount").textContent=visits;
+$("orderCount").textContent=orders.length;
+$("confirmedCount").textContent=confirmed;
+$("pendingCount").textContent=pending;
+
+showOrders(orders);
+
+setStatus("statsStatus","تم تحديث الإحصائيات بنجاح ✓");
+
+}catch(error){
+setStatus("statsStatus","خطأ في تحميل الإحصائيات: "+error.message);
+console.error(error);
+}
+}
+
+// عرض الطلبات للأدمن فقط
+function showOrders(orders){
+
+const list=$("ordersList");
+list.replaceChildren();
+
+if(!orders.length){
+list.appendChild(createElement("p","لا توجد طلبات حتى الآن.","empty"));
+return;
+}
+
+orders.forEach(order=>{
+
+const card=createElement("div",undefined,"order-card");
+
+const title=createElement("h3","طلب رقم: "+order.id.slice(0,8));
+card.appendChild(title);
+
+const status=createElement(
+"p",
+order.status==="confirmed"?"الحالة: تم تأكيد الشراء ✓":"الحالة: في انتظار التأكيد",
+order.status==="confirmed"?"order-confirmed":"order-pending"
+);
+card.appendChild(status);
+
+const date=new Date(order.created_at);
+card.appendChild(createElement(
+"p",
+"التاريخ: "+date.toLocaleString("ar-DZ")
+));
+
+let items=order.items||[];
+
+if(typeof items==="string"){
+try{items=JSON.parse(items)}catch(e){items=[]}
+}
+
+const itemsTitle=createElement("p","المنتجات المطلوبة:");
+card.appendChild(itemsTitle);
+
+if(Array.isArray(items)){
+items.forEach(item=>{
+card.appendChild(createElement(
+"p",
+"• "+String(item.name||"منتج")+" — "+String(item.price||"حسب الطلب")
+));
+});
+}
+
+if(order.status==="pending"){
+
+const actions=createElement("div",undefined,"order-actions");
+
+const confirm=createElement("button","✓ تأكيد الشراء","confirm-btn");
+
+confirm.addEventListener("click",()=>confirmOrder(order.id));
+
+actions.appendChild(confirm);
+card.appendChild(actions);
+
+}
+
+list.appendChild(card);
+
+});
+}
+
+// تأكيد شراء
+async function confirmOrder(id){
+
+if(!isAdmin)return;
+
+if(!confirm("هل تؤكد أن عملية الشراء تمت فعلاً؟"))return;
+
+const {error}=await db
+.from("store_orders")
+.update({status:"confirmed"})
+.eq("id",id);
+
+if(error){
+setStatus("statsStatus","خطأ: "+error.message);
+return;
+}
+
+setStatus("statsStatus","تم تأكيد الشراء بنجاح ✓");
+
+await loadStats();
+
+}
+
+// تحديث الإحصائيات
+$("refreshStats").addEventListener("click",()=>{
+loadStats();
+});
+
 // إضافة أو تعديل منتج
 $("productForm").addEventListener("submit",async e=>{
 e.preventDefault();
@@ -315,8 +550,10 @@ setStatus("adminStatus","خطأ: "+result.error.message);
 return;
 }
 
-setStatus("adminStatus",editingId!==null?
-"تم تعديل المنتج بنجاح ✓":"تمت إضافة المنتج بنجاح ✓");
+setStatus(
+"adminStatus",
+editingId!==null?"تم تعديل المنتج بنجاح ✓":"تمت إضافة المنتج بنجاح ✓"
+);
 
 resetForm();
 await loadProducts();
@@ -375,6 +612,7 @@ showCart();
 
 function showCart(){
 $("count").textContent=cart.length;
+
 const box=$("cartItems");
 box.replaceChildren();
 
@@ -384,10 +622,16 @@ return;
 }
 
 cart.forEach((p,i)=>{
+
 const item=createElement("div",undefined,"cart-item");
-item.appendChild(createElement("span",p.icon+" "+p.name));
+
+item.appendChild(createElement(
+"span",
+p.icon+" "+p.name+" — "+p.price
+));
 
 const remove=createElement("button","حذف","remove");
+
 remove.addEventListener("click",()=>{
 cart.splice(i,1);
 showCart();
@@ -395,31 +639,79 @@ showCart();
 
 item.appendChild(remove);
 box.appendChild(item);
+
 });
 }
 
-// إرسال الطلب
-$("sendOrder").addEventListener("click",()=>{
+// تسجيل الطلب وإرساله عبر تيليغرام
+$("sendOrder").addEventListener("click",async()=>{
+
 if(!cart.length){
 alert("أضف خدمة إلى السلة أولاً");
 return;
 }
 
-const details=cart.map(p=>"• "+p.name).join("\n");
+// فتح نافذة مباشرة لتجنب منع النوافذ المنبثقة
+const telegramWindow=window.open("about:blank","_blank");
 
-const message="السلام عليكم، أريد طلب الخدمات التالية من ZADX STORE:\n"+details;
+const orderItems=cart.map(p=>({
+name:p.name,
+price:String(p.price)
+}));
 
-const url="https://t.me/share/url?url="+
+const details=orderItems.map(p=>
+"• "+p.name+" — "+p.price
+).join("\n");
+
+const message=
+"السلام عليكم، أريد طلب الخدمات التالية من ZADX STORE:\n"+
+details;
+
+const url=
+"https://t.me/share/url?url="+
 encodeURIComponent("https://aminhamidd1999-del.github.io/zadx_store/")+
 "&text="+encodeURIComponent(message);
 
-window.open(url,"_blank");
+// تسجيل الطلب في قاعدة البيانات
+try{
+
+const {error}=await db
+.from("store_orders")
+.insert({
+id:crypto.randomUUID(),
+items:orderItems,
+status:"pending"
+});
+
+if(error)throw error;
+
+cart=[];
+showCart();
+
+if(telegramWindow){
+telegramWindow.location.href=url;
+}else{
+alert("تم تسجيل الطلب. افتح تيليغرام لإكمال الإرسال.");
+window.location.href=url;
+}
+
+}catch(error){
+
+if(telegramWindow)telegramWindow.close();
+
+alert("تعذر تسجيل الطلب: "+error.message);
+console.error(error);
+
+}
+
 });
 
 // تشغيل المتجر
 showCart();
+recordVisit();
 loadProducts();
 checkAdmin();
+
 </script>
 </body>
 </html>
