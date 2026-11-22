@@ -29,10 +29,11 @@ header{padding:22px 16px;background:#111;border-bottom:1px solid #b58b35;display
 .product button{width:100%;padding:11px;border:0;border-radius:8px;background:#d9aa3e;font-weight:bold;cursor:pointer}
 .cartbox{margin:16px;background:#171717;border:1px solid #80632e;border-radius:13px;padding:18px}
 .cartbox h2{color:#e5b84c}
-.cart-item{padding:9px 0;border-bottom:1px solid #333}
+.cart-item{padding:9px 0;border-bottom:1px solid #333;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.remove{background:#9d3434;color:white;border:0;padding:7px 10px;border-radius:5px}
 footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 .empty{color:#999}
-.status{color:#aaa;font-size:12px;margin-top:12px}
+.status{color:#aaa;font-size:12px;margin-top:12px;overflow-wrap:anywhere;line-height:1.7}
 @media(max-width:360px){.products{grid-template-columns:1fr}}
 </style>
 </head>
@@ -86,12 +87,6 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
 "sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
 
-const db = window.supabase.createClient(
-SUPABASE_URL,
-SUPABASE_KEY
-);
-
-// منتجات احتياطية حتى تبقى الواجهة ظاهرة
 const defaultProducts = [
 {name:"بوتات تيليغرام",description:"بوتات مخصصة حسب احتياجاتك",price:"حسب الطلب",icon:"🤖"},
 {name:"خدمات رقمية",description:"حلول وخدمات إلكترونية متنوعة",price:"حسب الطلب",icon:"💻"},
@@ -99,6 +94,7 @@ const defaultProducts = [
 {name:"إعداد البوتات",description:"مساعدة في إعداد وتشغيل البوتات",price:"حسب الطلب",icon:"⚙️"}
 ];
 
+let db = null;
 let products = [];
 let cart = [];
 
@@ -106,17 +102,26 @@ function setStatus(message){
 document.getElementById("connectionStatus").textContent = message;
 }
 
-function createElement(tag, text, className){
+function createElement(tag,text,className){
 const el = document.createElement(tag);
 if(text !== undefined) el.textContent = text;
 if(className) el.className = className;
 return el;
 }
 
-// تحميل المنتجات من Supabase
+// تحميل المنتجات
 async function loadProducts(){
 
 try{
+
+if(!window.supabase){
+throw new Error("مكتبة Supabase لم يتم تحميلها");
+}
+
+db = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
 
 const {data,error} = await db
 .from("products")
@@ -135,12 +140,12 @@ price:p.price ?? "حسب الطلب",
 icon:p.icon || "⭐"
 }));
 
-setStatus("متصل بقاعدة البيانات بنجاح ✓");
+setStatus("متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+data.length);
 
 }else{
 
 products = defaultProducts;
-setStatus("قاعدة البيانات متصلة، لا توجد منتجات مضافة بعد.");
+setStatus("الاتصال ناجح، لكن جدول المنتجات فارغ.");
 
 }
 
@@ -151,7 +156,13 @@ showProducts();
 console.error("Supabase error:",error);
 
 products = defaultProducts;
-setStatus("تعذر تحميل المنتجات من قاعدة البيانات. عرض المنتجات الافتراضية.");
+
+const message = error?.message || String(error);
+const code = error?.code ? " | Code: "+error.code : "";
+const details = error?.details ? " | Details: "+error.details : "";
+const hint = error?.hint ? " | Hint: "+error.hint : "";
+
+setStatus("خطأ الاتصال: "+message+code+details+hint);
 
 showProducts();
 
@@ -169,21 +180,10 @@ products.forEach((p,i)=>{
 
 const card = createElement("div",undefined,"product");
 
-card.appendChild(
-createElement("div",p.icon,"symbol")
-);
-
-card.appendChild(
-createElement("h3",p.name)
-);
-
-card.appendChild(
-createElement("p",p.desc)
-);
-
-card.appendChild(
-createElement("div",String(p.price),"price")
-);
+card.appendChild(createElement("div",p.icon,"symbol"));
+card.appendChild(createElement("h3",p.name));
+card.appendChild(createElement("p",p.desc));
+card.appendChild(createElement("div",String(p.price),"price"));
 
 const btn = createElement("button","إضافة إلى السلة");
 btn.addEventListener("click",()=>addToCart(i));
@@ -194,19 +194,15 @@ list.appendChild(card);
 });
 
 if(!products.length){
-list.appendChild(
-createElement("p","لا توجد منتجات حالياً","empty")
-);
+list.appendChild(createElement("p","لا توجد منتجات حالياً","empty"));
 }
 
 }
 
 // إضافة للسلة
 function addToCart(i){
-
 cart.push(products[i]);
 showCart();
-
 }
 
 // عرض السلة
@@ -218,29 +214,19 @@ const box = document.getElementById("cartItems");
 box.replaceChildren();
 
 if(!cart.length){
-
-box.appendChild(
-createElement("p","السلة فارغة حالياً","empty")
-);
-
+box.appendChild(createElement("p","السلة فارغة حالياً","empty"));
 return;
 }
 
 cart.forEach((p,i)=>{
 
-const item = createElement(
-"div",
-p.icon+" "+p.name,
-"cart-item"
-);
-
-const remove = createElement("button","حذف");
-
-remove.style.cssText =
-"float:left;background:#9d3434;color:white;border:0;padding:5px 9px;border-radius:5px";
+const item = createElement("div",undefined,"cart-item");
+const name = createElement("span",p.icon+" "+p.name);
+const remove = createElement("button","حذف","remove");
 
 remove.addEventListener("click",()=>removeItem(i));
 
+item.appendChild(name);
 item.appendChild(remove);
 box.appendChild(item);
 
@@ -250,10 +236,8 @@ box.appendChild(item);
 
 // حذف من السلة
 function removeItem(i){
-
 cart.splice(i,1);
 showCart();
-
 }
 
 // إرسال الطلب
@@ -282,8 +266,8 @@ window.open(url,"_blank");
 }
 
 // تشغيل المتجر
-loadProducts();
 showCart();
+loadProducts();
 
 </script>
 </body>
