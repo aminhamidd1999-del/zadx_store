@@ -127,7 +127,7 @@ a{color:var(--gold2)}
     <input id="editProductId" type="hidden">
     <div class="form-grid">
      <div><label for="productName">اسم المنتج</label><input id="productName" placeholder="اسم المنتج"></div>
-     <div><label for="productPrice">السعر</label><input id="productPrice" type="number" min="0" step="0.01" placeholder="السعر"></div>
+     <div><label for="productPrice">السعر</label><input id="productPrice" type="text" inputmode="decimal" placeholder="مثال: 500 أو حسب الطلب"></div>
      <div><label for="productIcon">الأيقونة</label><input id="productIcon" placeholder="🤖"></div>
     </div>
     <label for="productDescription">الوصف</label><textarea id="productDescription" placeholder="وصف المنتج"></textarea>
@@ -161,6 +161,17 @@ function go(section){
  if(section==="admin") checkAdminSession();
  window.scrollTo({top:0,behavior:"smooth"});
 }
+function parsePrice(value){
+ if(typeof value==="number")return Number.isFinite(value)&&value>=0?value:null;
+ const raw=String(value??"").trim();
+ if(!raw)return null;
+ const normalized=raw.replace(/[٠-٩]/g,d=>"٠١٢٣٤٥٦٧٨٩".indexOf(d)).replace(/[۰-۹]/g,d=>"۰۱۲۳۴۵۶۷۸۹".indexOf(d)).replace(/[,،]/g,"").replace(/\s*(DA|DZD)\s*/ig,"").trim();
+ if(/حسب\s*الطلب|حسب\s*طلب|عند\s*الطلب/i.test(normalized))return null;
+ if(!/^\d+(?:\.\d+)?$/.test(normalized))return null;
+ const n=Number(normalized);return Number.isFinite(n)&&n>=0?n:null;
+}
+function isCustomPrice(value){return parsePrice(value)===null && /حسب\s*الطلب|حسب\s*طلب|عند\s*الطلب/i.test(String(value??""));}
+function displayPrice(value){const n=parsePrice(value);return n===null?"حسب الطلب":money(n)}
 function money(value){return Number(value||0).toLocaleString("en-US")+" DA";}
 function setStatus(id,message,type=""){
  const el=document.getElementById(id); if(!el)return;
@@ -169,7 +180,7 @@ function setStatus(id,message,type=""){
 async function loadProducts(){
  const status=document.getElementById("dbStatus");
  try{
-  const {data,error}=await supabaseClient.from("products").select("id,name,description,price,icon").order("id",{ascending:false});
+  const {data,error}=await supabaseClient.from("products").select("id,name,description,price").order("id",{ascending:false});
   if(error)throw error;
   products=data||[];
   status.textContent="متصل بقاعدة البيانات ✓"; status.className="status success";
@@ -180,7 +191,7 @@ async function loadProducts(){
  }
 }
 function productCard(p,admin=false){
- return `<article class="product"><div class="icon">${escapeHTML(p.icon||"✨")}</div><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(p.description||"")}</p><div class="price">${money(p.price)}</div>${admin?`<div class="actions"><button class="btn" onclick="editProduct('${String(p.id).replace(/'/g,"")}')">تعديل</button><button class="danger" onclick="deleteProduct('${String(p.id).replace(/'/g,"")}')">حذف</button></div>`:`<button class="primary" onclick="addToCart('${String(p.id).replace(/'/g,"")}')">أضف إلى السلة</button>`}</article>`;
+ return `<article class="product"><div class="icon">${escapeHTML(p.icon||"✨")}</div><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(p.description||"")}</p><div class="price">${escapeHTML(displayPrice(p.price))}</div>${admin?`<div class="actions"><button class="btn" onclick="editProduct('${String(p.id).replace(/'/g,"")}')">تعديل</button><button class="danger" onclick="deleteProduct('${String(p.id).replace(/'/g,"")}')">حذف</button></div>`:`<button class="primary" onclick="addToCart('${String(p.id).replace(/'/g,"")}')">أضف إلى السلة</button>`}</article>`;
 }
 function renderProducts(){
  const el=document.getElementById("products");
@@ -189,15 +200,17 @@ function renderProducts(){
 function addToCart(id){
  const p=products.find(x=>String(x.id)===String(id)); if(!p)return;
  const found=cart.find(x=>String(x.id)===String(id));
- if(found)found.quantity++; else cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1});
+ if(found)found.quantity++; else cart.push({id:p.id,name:p.name,price:parsePrice(p.price),customPrice:parsePrice(p.price)===null,quantity:1});
  updateCartCount(); renderCart();
 }
 function updateCartCount(){document.getElementById("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)}
 function renderCart(){
  const el=document.getElementById("cartItems");
  if(!cart.length)el.innerHTML='<p class="muted">السلة فارغة حاليًا.</p>';
- else el.innerHTML=cart.map((x,i)=>`<div class="cart-line row" style="justify-content:space-between"><div><strong>${escapeHTML(x.name)}</strong><div class="small">${money(x.price)} × ${x.quantity}</div></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><b>${x.quantity}</b><button onclick="changeQty(${i},1)">+</button><button class="danger" onclick="removeCartItem(${i})">حذف</button></div></div>`).join("");
- document.getElementById("cartTotal").textContent="المجموع: "+money(cart.reduce((s,x)=>s+x.price*x.quantity,0));
+ else el.innerHTML=cart.map((x,i)=>`<div class="cart-line row" style="justify-content:space-between"><div><strong>${escapeHTML(x.name)}</strong><div class="small">${x.customPrice?"حسب الطلب":money(x.price)} × ${x.quantity}</div></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><b>${x.quantity}</b><button onclick="changeQty(${i},1)">+</button><button class="danger" onclick="removeCartItem(${i})">حذف</button></div></div>`).join("");
+ const hasCustom=cart.some(x=>x.customPrice);
+ const fixedTotal=cart.reduce((sum,x)=>sum+(x.customPrice?0:x.price*x.quantity),0);
+ document.getElementById("cartTotal").textContent=hasCustom?(fixedTotal?"المجموع المبدئي: "+money(fixedTotal)+" + منتجات حسب الطلب":"المجموع النهائي يُحدد بعد التواصل"):("المجموع: "+money(fixedTotal));
 }
 function changeQty(i,n){if(!cart[i])return;cart[i].quantity+=n;if(cart[i].quantity<=0)cart.splice(i,1);updateCartCount();renderCart()}
 function removeCartItem(i){cart.splice(i,1);updateCartCount();renderCart()}
@@ -210,19 +223,22 @@ async function sendOrder(){
  const msg=document.getElementById("checkoutMsg");
  if(!cart.length){setStatus("checkoutMsg","السلة فارغة.","error");return}
  if(!name||!phone){setStatus("checkoutMsg","أدخل الاسم ورقم التواصل من فضلك.","error");return}
- const total=cart.reduce((s,x)=>s+x.price*x.quantity,0);
- const items=cart.map(x=>({id:x.id,name:x.name,price:x.price,quantity:x.quantity}));
+ const hasCustom=cart.some(x=>x.customPrice);
+ // Supabase orders.total is NOT NULL, so store the numeric subtotal of fixed-price items.
+ const total=cart.reduce((sum,x)=>sum+(x.customPrice?0:x.price*x.quantity),0);
+ const items=cart.map(x=>({id:x.id,name:x.name,price:x.customPrice?"حسب الطلب":x.price,quantity:x.quantity}));
  const btn=document.getElementById("sendOrderBtn");btn.disabled=true;btn.textContent="جاري إرسال الطلب...";
  try{
   const {data,error}=await supabaseClient.from("orders").insert([{customer_name:name,phone,note,payment,items,total}]).select("id").single();
   if(error)throw error;
   const orderId=data?.id||"غير متوفر";
-  const lines=items.map(x=>`• ${x.name} × ${x.quantity} — ${money(x.price*x.quantity)}`).join("\n");
-  const message=`طلب جديد من ZADX STORE\nرقم الطلب: ${orderId}\nالاسم: ${name}\nالتواصل: ${phone}\nالدفع: ${payment}\nالمنتجات:\n${lines}\nالمجموع: ${money(total)}\nملاحظة: ${note||"لا توجد"}`;
+  const lines=items.map(x=>`• ${x.name} × ${x.quantity} — ${x.price==="حسب الطلب"?"حسب الطلب":money(x.price*x.quantity)}`).join("\n");
+  const totalLabel=hasCustom?(total?money(total)+" (مبدئي، توجد منتجات حسب الطلب)":"يحدد بعد التواصل"):money(total);
+  const message=`طلب جديد من ZADX STORE\nرقم الطلب: ${orderId}\nالاسم: ${name}\nالتواصل: ${phone}\nالدفع: ${payment}\nالمنتجات:\n${lines}\nالمجموع: ${totalLabel}\nملاحظة: ${note||"لا توجد"}`;
   try{await supabaseClient.functions.invoke("send_telegram_order",{body:{message}})}catch(telegramError){console.warn("Telegram notification:",telegramError)}
   cart=[];updateCartCount();renderCart();
   document.getElementById("customerName").value="";document.getElementById("customerPhone").value="";document.getElementById("orderNote").value="";
-  setStatus("checkoutMsg","تم إرسال طلبك بنجاح! احتفظ برقم الطلب: "+orderId,"success");
+  setStatus("checkoutMsg","تم إرسال طلبك بنجاح! احتفظ برقم الطلب: "+orderId+(hasCustom?" — السعر النهائي يُحدد بعد التواصل":""),"success");
  }catch(error){setStatus("checkoutMsg","لم يتم إرسال الطلب: "+error.message,"error")}
  finally{btn.disabled=false;btn.textContent="إرسال الطلب"}
 }
@@ -267,7 +283,7 @@ function showAdminTab(tab){
 async function loadAdminData(){await loadAdminProducts();await loadAdminOrders()}
 async function loadAdminProducts(){
  const el=document.getElementById("adminProducts");el.textContent="جاري تحميل المنتجات...";
- const {data,error}=await supabaseClient.from("products").select("id,name,description,price,icon").order("id",{ascending:false});
+ const {data,error}=await supabaseClient.from("products").select("id,name,description,price").order("id",{ascending:false});
  if(error){el.textContent="خطأ: "+error.message;return}
  products=data||[];renderProducts();el.innerHTML=products.length?products.map(p=>productCard(p,true)).join(""):'<div class="panel">لا توجد منتجات.</div>';
 }
@@ -282,11 +298,12 @@ function editProduct(id){
 async function saveProduct(){
  const id=document.getElementById("editProductId").value;
  const name=document.getElementById("productName").value.trim();
- const price=Number(document.getElementById("productPrice").value);
- const icon=document.getElementById("productIcon").value.trim()||"✨";
+ const priceText=document.getElementById("productPrice").value.trim();
+ const parsedPrice=parsePrice(priceText);
+ const price=isCustomPrice(priceText)?"حسب الطلب":parsedPrice;
  const description=document.getElementById("productDescription").value.trim();
- if(!name||!Number.isFinite(price)||price<0){setStatus("productMsg","أدخل اسمًا وسعرًا صحيحًا.","error");return}
- const payload={name,price,icon,description};
+ if(!name||price===null){setStatus("productMsg","أدخل سعرًا رقميًا أو اكتب: حسب الطلب.","error");return}
+ const payload={name,price,description};
  try{
   const result=id?await supabaseClient.from("products").update(payload).eq("id",id):await supabaseClient.from("products").insert([payload]);
   if(result.error)throw result.error;
@@ -305,10 +322,11 @@ async function loadAdminOrders(){
  if(error){el.textContent="تعذر تحميل الطلبات: "+error.message;return}
  if(!data?.length){el.innerHTML='<div class="panel">لا توجد طلبات حتى الآن.</div>';return}
  el.innerHTML=data.map(o=>{
-  const itemText=Array.isArray(o.items)?o.items.map(x=>`${escapeHTML(x.name)} × ${escapeHTML(x.quantity)}`).join("، "):"";
+  const itemText=Array.isArray(o.items)?o.items.map(x=>`${escapeHTML(x.name)} × ${escapeHTML(x.quantity)}${x.price==="حسب الطلب"?" (حسب الطلب)":""}`).join("، "):"";
+  const hasCustomOrder=Array.isArray(o.items)&&o.items.some(x=>x.price==="حسب الطلب");
   const date=o.created_at?new Date(o.created_at).toLocaleString("ar-DZ"):"";
   return `<article class="panel order"><div class="row" style="justify-content:space-between"><strong>طلب #${escapeHTML(String(o.id).slice(0,8))}</strong><span class="small">${escapeHTML(date)}</span></div>
-  <p>الاسم: ${escapeHTML(o.customer_name)} | التواصل: ${escapeHTML(o.phone)}</p><p>المنتجات: ${itemText}</p><p>الدفع: ${escapeHTML(o.payment)} | المجموع: <b class="price">${money(o.total)}</b></p><p>ملاحظة: ${escapeHTML(o.note||"لا توجد")}</p>
+  <p>الاسم: ${escapeHTML(o.customer_name)} | التواصل: ${escapeHTML(o.phone)}</p><p>المنتجات: ${itemText}</p><p>الدفع: ${escapeHTML(o.payment)} | المجموع: <b class="price">${hasCustomOrder?(Number(o.total)>0?money(o.total)+" (مبدئي)":"يحدد بعد التواصل"):money(o.total)}</b></p><p>ملاحظة: ${escapeHTML(o.note||"لا توجد")}</p>
   <div class="row"><label style="margin:0">الحالة</label><select id="status-${escapeHTML(o.id)}" style="max-width:190px"><option ${o.status==="جديد"?"selected":""}>جديد</option><option ${o.status==="قيد المعالجة"?"selected":""}>قيد المعالجة</option><option ${o.status==="مكتمل"?"selected":""}>مكتمل</option><option ${o.status==="ملغي"?"selected":""}>ملغي</option></select><button class="primary" onclick="updateOrderStatus('${String(o.id).replace(/'/g,"")}')">حفظ الحالة</button></div>
   </article>`;
  }).join("");
