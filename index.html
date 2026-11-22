@@ -5,60 +5,67 @@ async function sendOrder(){
     return;
   }
 
-  const name=document.getElementById("customer").value.trim();
-  const phone=document.getElementById("phone").value.trim();
+  const name = document.getElementById("customer").value.trim();
+  const phone = document.getElementById("phone").value.trim();
 
   if(!name || !phone){
     alert("أدخل اسمك ورقم هاتفك.");
     return;
   }
 
-  const button=document.querySelector(
+  const button = document.querySelector(
     '#checkout button[onclick="sendOrder()"]'
   );
 
-  button.disabled=true;
-  button.textContent="جاري إرسال الطلب...";
+  if(button){
+    button.disabled = true;
+    button.textContent = "جاري إرسال الطلب...";
+  }
 
   try {
-    const response=await fetch(
-      "https://iyxxesftwprdrbxspdfb.supabase.co/functions/v1/send_telegram_order",
+    const response = await fetch(
+      "https://iyxxesftwprdrbxspdfb.supabase.co/functions/v1/send-telegram-order",
       {
-        method:"POST",
-        headers:{
-          "Content-Type":"application/json",
-          "apikey":SUPABASE_KEY
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_KEY
         },
-        body:JSON.stringify({
-          customer:name,
-          phone:phone,
-          payment:document.getElementById("payment").value,
-          note:document.getElementById("note").value,
-          items:cart.map(p=>({
-            name:p.name,
-            price:Number(p.price),
-            quantity:p.quantity
+        body: JSON.stringify({
+          customer: name,
+          phone: phone,
+          payment: document.getElementById("payment").value,
+          note: document.getElementById("note").value,
+          items: cart.map(p => ({
+            name: p.name,
+            price: Number(p.price),
+            quantity: p.quantity
           }))
         })
       }
     );
 
-    const result=await response.json();
+    const result = await response.json();
 
     if(!response.ok || !result.success){
-      throw new Error(result.error || "فشل إرسال الطلب");
+      throw new Error(
+        result.error || "فشل إرسال الطلب. رمز الخطأ: " + response.status
+      );
     }
 
     alert("تم إرسال طلبك بنجاح إلى ZADX STORE ✓");
-    cart=[];
+
+    cart = [];
     updateCount();
     renderCart();
     showSection("home");
 
   } catch(error) {
-    alert("تعذر إرسال الطلب: "+error.message);
+    alert("تعذر إرسال الطلب: " + error.message);
   } finally {
-    button.disabled=false;
-    button.textContent="إرسال الطلب عبر Telegram";
+    if(button){
+      button.disabled = false;
+      button.textContent = "إرسال الطلب عبر Telegram";
+    }
   }
 }
