@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#090909">
 <title>ZADX STORE</title>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
@@ -25,14 +26,17 @@ header{padding:22px 16px;background:#111;border-bottom:1px solid #b58b35;display
 .product h3{font-size:16px;margin:5px 0 10px}
 .product p{font-size:13px;color:#aaa;line-height:1.6;min-height:40px}
 .price{color:#e5b84c;font-weight:bold;margin:12px 0}
-.product button{width:100%;padding:11px;border:0;border-radius:8px;background:#d9aa3e;font-weight:bold}
+.product button{width:100%;padding:11px;border:0;border-radius:8px;background:#d9aa3e;font-weight:bold;cursor:pointer}
 .cartbox{margin:16px;background:#171717;border:1px solid #80632e;border-radius:13px;padding:18px}
 .cartbox h2{color:#e5b84c}
 .cart-item{padding:9px 0;border-bottom:1px solid #333}
 footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 .empty{color:#999}
+.status{color:#aaa;font-size:12px;margin-top:12px}
+@media(max-width:360px){.products{grid-template-columns:1fr}}
 </style>
 </head>
+
 <body>
 
 <header>
@@ -42,19 +46,29 @@ footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 
 <section class="hero">
 <h1>مرحبا بك في ZADX STORE</h1>
-<p>وجهتك للخدمات الرقمية والبوتات والحلول الإلكترونية<br>جودة، احترافية وسهولة في الطلب</p>
+<p>
+وجهتك للخدمات الرقمية والبوتات والحلول الإلكترونية<br>
+جودة، احترافية وسهولة في الطلب
+</p>
 <a href="#products" class="btn">اكتشف خدماتنا</a>
 </section>
 
 <section class="section" id="products">
 <h2>⭐ خدماتنا الرقمية</h2>
-<div class="products" id="productList"></div>
+<div class="products" id="productList">
+<p class="empty">جاري تحميل المنتجات...</p>
+</div>
+<p class="status" id="connectionStatus">جاري الاتصال بقاعدة البيانات...</p>
 </section>
 
 <section class="cartbox">
 <h2>🛒 سلة الطلبات</h2>
-<div id="cartItems"><p class="empty">السلة فارغة حالياً</p></div>
-<button class="btn" onclick="sendOrder()">إرسال الطلب عبر تيليغرام</button>
+<div id="cartItems">
+<p class="empty">السلة فارغة حالياً</p>
+</div>
+<button class="btn" onclick="sendOrder()">
+إرسال الطلب عبر تيليغرام
+</button>
 </section>
 
 <footer>
@@ -63,62 +77,214 @@ footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
 <a class="btn" href="https://t.me/ZADX_PRO">تواصل معنا</a>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-const products=[
-{name:"بوتات تيليغرام",desc:"بوتات مخصصة حسب احتياجاتك",price:"حسب الطلب",icon:"🤖"},
-{name:"خدمات رقمية",desc:"حلول وخدمات إلكترونية متنوعة",price:"حسب الطلب",icon:"💻"},
-{name:"تصميم احترافي",desc:"تصميمات وشعارات رقمية",price:"حسب الطلب",icon:"🎨"},
-{name:"إعداد البوتات",desc:"مساعدة في إعداد وتشغيل البوتات",price:"حسب الطلب",icon:"⚙️"}
+const SUPABASE_URL =
+"https://iyxxesftwprdrbxspdfb.supabase.co";
+
+const SUPABASE_KEY =
+"sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
+
+const db = window.supabase.createClient(
+SUPABASE_URL,
+SUPABASE_KEY
+);
+
+// منتجات احتياطية حتى تبقى الواجهة ظاهرة
+const defaultProducts = [
+{name:"بوتات تيليغرام",description:"بوتات مخصصة حسب احتياجاتك",price:"حسب الطلب",icon:"🤖"},
+{name:"خدمات رقمية",description:"حلول وخدمات إلكترونية متنوعة",price:"حسب الطلب",icon:"💻"},
+{name:"تصميم احترافي",description:"تصميمات وشعارات رقمية",price:"حسب الطلب",icon:"🎨"},
+{name:"إعداد البوتات",description:"مساعدة في إعداد وتشغيل البوتات",price:"حسب الطلب",icon:"⚙️"}
 ];
 
-let cart=[];
+let products = [];
+let cart = [];
 
-function showProducts(){
-document.getElementById("productList").innerHTML=products.map((p,i)=>`
-<div class="product">
-<div class="symbol">${p.icon}</div>
-<h3>${p.name}</h3>
-<p>${p.desc}</p>
-<div class="price">${p.price}</div>
-<button onclick="addToCart(${i})">إضافة إلى السلة</button>
-</div>`).join("");
+function setStatus(message){
+document.getElementById("connectionStatus").textContent = message;
 }
 
+function createElement(tag, text, className){
+const el = document.createElement(tag);
+if(text !== undefined) el.textContent = text;
+if(className) el.className = className;
+return el;
+}
+
+// تحميل المنتجات من Supabase
+async function loadProducts(){
+
+try{
+
+const {data,error} = await db
+.from("products")
+.select("id,name,description,price,icon")
+.order("id",{ascending:true});
+
+if(error) throw error;
+
+if(data && data.length > 0){
+
+products = data.map(p => ({
+id:p.id,
+name:p.name || "منتج",
+desc:p.description || "",
+price:p.price ?? "حسب الطلب",
+icon:p.icon || "⭐"
+}));
+
+setStatus("متصل بقاعدة البيانات بنجاح ✓");
+
+}else{
+
+products = defaultProducts;
+setStatus("قاعدة البيانات متصلة، لا توجد منتجات مضافة بعد.");
+
+}
+
+showProducts();
+
+}catch(error){
+
+console.error("Supabase error:",error);
+
+products = defaultProducts;
+setStatus("تعذر تحميل المنتجات من قاعدة البيانات. عرض المنتجات الافتراضية.");
+
+showProducts();
+
+}
+
+}
+
+// عرض المنتجات
+function showProducts(){
+
+const list = document.getElementById("productList");
+list.replaceChildren();
+
+products.forEach((p,i)=>{
+
+const card = createElement("div",undefined,"product");
+
+card.appendChild(
+createElement("div",p.icon,"symbol")
+);
+
+card.appendChild(
+createElement("h3",p.name)
+);
+
+card.appendChild(
+createElement("p",p.desc)
+);
+
+card.appendChild(
+createElement("div",String(p.price),"price")
+);
+
+const btn = createElement("button","إضافة إلى السلة");
+btn.addEventListener("click",()=>addToCart(i));
+
+card.appendChild(btn);
+list.appendChild(card);
+
+});
+
+if(!products.length){
+list.appendChild(
+createElement("p","لا توجد منتجات حالياً","empty")
+);
+}
+
+}
+
+// إضافة للسلة
 function addToCart(i){
+
 cart.push(products[i]);
 showCart();
+
 }
 
+// عرض السلة
 function showCart(){
-document.getElementById("count").textContent=cart.length;
-const box=document.getElementById("cartItems");
+
+document.getElementById("count").textContent = cart.length;
+
+const box = document.getElementById("cartItems");
+box.replaceChildren();
+
 if(!cart.length){
-box.innerHTML='<p class="empty">السلة فارغة حالياً</p>';
+
+box.appendChild(
+createElement("p","السلة فارغة حالياً","empty")
+);
+
 return;
 }
-box.innerHTML=cart.map((p,i)=>`
-<div class="cart-item">${p.icon} ${p.name}
-<button onclick="removeItem(${i})" style="float:left;background:#9d3434;color:white;border:0;padding:5px 9px;border-radius:5px">حذف</button>
-</div>`).join("");
+
+cart.forEach((p,i)=>{
+
+const item = createElement(
+"div",
+p.icon+" "+p.name,
+"cart-item"
+);
+
+const remove = createElement("button","حذف");
+
+remove.style.cssText =
+"float:left;background:#9d3434;color:white;border:0;padding:5px 9px;border-radius:5px";
+
+remove.addEventListener("click",()=>removeItem(i));
+
+item.appendChild(remove);
+box.appendChild(item);
+
+});
+
 }
 
+// حذف من السلة
 function removeItem(i){
+
 cart.splice(i,1);
 showCart();
+
 }
 
+// إرسال الطلب
 function sendOrder(){
+
 if(!cart.length){
 alert("أضف خدمة إلى السلة أولاً");
 return;
 }
-const details=cart.map(p=>"• "+p.name).join("\n");
-const message="السلام عليكم، أريد طلب الخدمات التالية من ZADX STORE:\n"+details;
-const url="https://t.me/share/url?url="+encodeURIComponent("https://aminhamidd1999-del.github.io/zadx_store/")+"&text="+encodeURIComponent(message);
+
+const details = cart.map(p =>
+"• "+p.name
+).join("\n");
+
+const message =
+"السلام عليكم، أريد طلب الخدمات التالية من ZADX STORE:\n"
++details;
+
+const url =
+"https://t.me/share/url?url="
++encodeURIComponent("https://aminhamidd1999-del.github.io/zadx_store/")
++"&text="+encodeURIComponent(message);
+
 window.open(url,"_blank");
+
 }
 
-showProducts();
+// تشغيل المتجر
+loadProducts();
+showCart();
+
 </script>
 </body>
 </html>
