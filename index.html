@@ -113,6 +113,13 @@ a{color:var(--gold2)}
  </div>
  <div id="adminPanel" hidden>
   <div class="row" style="justify-content:space-between"><span id="adminWelcome" class="success"></span><button class="btn" onclick="adminLogout()">تسجيل الخروج</button></div>
+  <h3 class="section-title">إحصائيات المتجر</h3>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(170px,1fr))">
+   <div class="panel"><div class="muted">إجمالي الزيارات</div><div class="total" id="statVisits">—</div></div>
+   <div class="panel"><div class="muted">زيارات اليوم</div><div class="total" id="statTodayVisits">—</div></div>
+   <div class="panel"><div class="muted">إجمالي الطلبات</div><div class="total" id="statOrders">—</div></div>
+  </div>
+  <div class="actions"><button class="btn" onclick="loadAdminStats()">تحديث الإحصائيات ↻</button></div>
   <div class="admin-tabs"><button onclick="showAdminTab('manageProducts')">المنتجات</button><button onclick="showAdminTab('manageOrders')">الطلبات</button></div>
   <div id="manageProducts">
    <div class="panel">
@@ -250,6 +257,7 @@ async function showAdminPanel(){
  document.getElementById("loginBox").hidden=true;document.getElementById("adminPanel").hidden=false;
  document.getElementById("adminWelcome").textContent="تم تسجيل الدخول: "+data.user.email;
  await loadAdminData();
+ await loadAdminStats();
 }
 async function adminLogout(){await supabaseClient.auth.signOut();currentSession=null;document.getElementById("loginBox").hidden=false;document.getElementById("adminPanel").hidden=true;document.getElementById("adminPassword").value="";setStatus("loginMsg","تم تسجيل الخروج.","success")}
 function showAdminTab(tab){
@@ -311,7 +319,41 @@ async function updateOrderStatus(id){
  if(error){alert("تعذر تحديث الحالة: "+error.message);return}
  alert("تم تحديث حالة الطلب.");await loadAdminOrders();
 }
+
+async function loadAdminStats(){
+ const visitsEl=document.getElementById("statVisits");
+ const todayEl=document.getElementById("statTodayVisits");
+ const ordersEl=document.getElementById("statOrders");
+ if(!visitsEl||!todayEl||!ordersEl)return;
+ visitsEl.textContent=todayEl.textContent=ordersEl.textContent="...";
+ try{
+  const [{count:visits,error:visitsError},{count:orders,error:ordersError}]=await Promise.all([
+   supabaseClient.from("site_visits").select("id",{count:"exact",head:true}),
+   supabaseClient.from("orders").select("id",{count:"exact",head:true})
+  ]);
+  if(visitsError)throw visitsError;
+  if(ordersError)throw ordersError;
+  const now=new Date();
+  const startOfDay=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  const {count:todayVisits,error:todayError}=await supabaseClient.from("site_visits").select("id",{count:"exact",head:true}).gte("created_at",startOfDay.toISOString());
+  if(todayError)throw todayError;
+  visitsEl.textContent=Number(visits||0).toLocaleString("ar-DZ");
+  todayEl.textContent=Number(todayVisits||0).toLocaleString("ar-DZ");
+  ordersEl.textContent=Number(orders||0).toLocaleString("ar-DZ");
+ }catch(error){
+  visitsEl.textContent=todayEl.textContent=ordersEl.textContent="غير متاح";
+  console.error("Stats error:",error);
+ }
+}
+async function recordVisit(){
+ try{
+  const {error}=await supabaseClient.from("site_visits").insert([{}]);
+  if(error)console.warn("Visit tracking:",error.message);
+ }catch(error){console.warn("Visit tracking:",error)}
+}
+
 supabaseClient.auth.onAuthStateChange((_event,session)=>{currentSession=session});
+recordVisit();
 loadProducts();
 </script>
 </body>
