@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -7,654 +6,313 @@
 <meta name="theme-color" content="#090909">
 <title>ZADX STORE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <style>
-*{box-sizing:border-box}
-[hidden]{display:none!important}
-body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
-header{padding:22px 16px;text-align:center;border-bottom:1px solid #292318}
-.logo{font-size:30px;font-weight:900;color:#e6bd64;letter-spacing:2px}
-header p{color:#aaa;font-size:13px}
-nav{display:flex;justify-content:center;gap:10px;padding:15px;flex-wrap:wrap}
-button{cursor:pointer}
-nav button,.btn{background:#d9ad50;color:#111;border:0;padding:12px 18px;border-radius:9px;font-weight:bold}
-nav button.secondary{background:#222;color:#fff}
-.container{max-width:1000px;margin:auto;padding:18px}
-h2{color:#e6bd64}
-.hero{text-align:center;padding:28px 10px}
-.hero h1{font-size:27px}
-.hero p{color:#aaa;line-height:1.8}
-.status{background:#171717;border:1px solid #333;padding:12px;border-radius:10px;color:#ccc;font-size:13px;margin-bottom:20px;line-height:1.7}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px}
-.product,.panel{background:#151515;border:1px solid #30291d;border-radius:13px;padding:17px}
-.product .emoji{font-size:35px}
-.product h3{margin:12px 0;color:#f1d28c}
-.product p{color:#aaa;line-height:1.6;font-size:14px;min-height:40px}
-.price{color:#e6bd64;font-size:20px;font-weight:bold;margin:15px 0}
-.btn{width:100%;margin-top:8px}
-.btn.dark{background:#292929;color:white}
-.btn.danger{background:#8c2929;color:white}
-input,textarea,select{width:100%;padding:13px;margin:7px 0;background:#101010;color:white;border:1px solid #444;border-radius:8px;font-size:15px}
-.cart-item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #333}
-.small{color:#aaa;font-size:13px}
-footer{text-align:center;padding:30px;color:#777;font-size:13px}
-.admin-product,.order-card{background:#111;border:1px solid #383024;border-radius:10px;padding:14px;margin:12px 0}
-.admin-product h3,.order-card h3{color:#e6bd64}
-.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
-.admin-actions button{flex:1;min-width:90px}
-.order-card p{line-height:1.7;color:#ccc;overflow-wrap:anywhere}
-hr{border:0;border-top:1px solid #333;margin:18px 0}
-a{color:#e6bd64}
+:root{--bg:#090909;--panel:#141414;--panel2:#1b1b1b;--gold:#d7ad53;--gold2:#f1d48b;--text:#f5f2ea;--muted:#aaa397;--line:#30291c;--red:#e06b6b;--green:#70c69a}
+*{box-sizing:border-box} [hidden]{display:none!important}
+body{margin:0;background:radial-gradient(circle at top,#1b1710 0,#090909 42%);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;min-height:100vh}
+button,input,textarea,select{font:inherit}button{cursor:pointer}
+.wrap{width:min(1100px,92%);margin:auto}
+header{position:sticky;top:0;z-index:5;background:#090909ed;border-bottom:1px solid var(--line);backdrop-filter:blur(12px)}
+.nav{min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-size:23px;font-weight:900;letter-spacing:1px;color:var(--gold)}
+nav{display:flex;gap:8px;flex-wrap:wrap}
+nav button,.btn{border:1px solid var(--line);background:#171717;color:var(--text);padding:10px 14px;border-radius:12px}
+nav button:hover,.btn:hover{border-color:var(--gold);color:var(--gold2)}
+.hero{text-align:center;padding:64px 12px 42px}
+.hero h1{font-size:clamp(30px,6vw,54px);margin:0;color:var(--gold2)}
+.hero p{color:var(--muted);margin:12px 0 0}
+.section-title{font-size:24px;color:var(--gold2);margin:28px 0 16px}
+.status{color:var(--muted);font-size:13px;margin:12px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:15px}
+.product,.panel{background:linear-gradient(145deg,#191919,#101010);border:1px solid var(--line);border-radius:17px;padding:18px}
+.product .icon{font-size:36px}.product h3{margin:10px 0 6px}.product p{color:var(--muted);min-height:42px;white-space:pre-wrap}
+.price{color:var(--gold2);font-weight:800;font-size:19px;margin:12px 0}
+.primary{background:linear-gradient(135deg,#f0d38b,#b9872d);border:0;color:#17120a;font-weight:800;padding:11px 16px;border-radius:11px}
+.primary:disabled{opacity:.55;cursor:not-allowed}
+.danger{background:#321919;border:1px solid #633333;color:#ffb2b2;padding:9px 12px;border-radius:10px}
+.muted{color:var(--muted)}.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input,textarea,select{width:100%;background:#0d0d0d;color:var(--text);border:1px solid #403723;border-radius:10px;padding:12px;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{min-height:85px;resize:vertical}
+label{display:block;color:var(--gold2);font-size:14px;margin:12px 0 6px}
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.cart-line,.order{border-bottom:1px solid var(--line);padding:12px 0}
+.qty{display:flex;align-items:center;gap:9px}.qty button{background:#292216;color:var(--gold2);border:1px solid var(--line);border-radius:8px;padding:4px 10px}
+.total{font-size:21px;color:var(--gold2);font-weight:900;margin:15px 0}
+.notice{padding:12px;border-radius:10px;background:#1a1710;border:1px solid var(--line);margin:12px 0;color:var(--gold2)}
+.success{color:var(--green)}.error{color:#ff9999}
+footer{margin-top:55px;padding:25px;text-align:center;border-top:1px solid var(--line);color:var(--muted)}
+.admin-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}
+.admin-tabs button{background:#211c12;color:var(--gold2);border:1px solid var(--line);border-radius:10px;padding:9px 13px}
+.small{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+a{color:var(--gold2)}
+@media(max-width:600px){.nav{align-items:flex-start;padding:12px 0;flex-direction:column}.hero{padding-top:42px}}
 </style>
 </head>
-
 <body>
-
 <header>
-<div class="logo">ZADX STORE</div>
-<p>YOUR DIGITAL WORLD STARTS HERE</p>
+ <div class="wrap nav">
+  <div class="logo">ZADX STORE</div>
+  <nav>
+   <button onclick="go('home')">الرئيسية</button>
+   <button onclick="go('cart')">السلة 🛒 <span id="cartCount">0</span></button>
+   <button onclick="go('contact')">اتصل بنا</button>
+   <button onclick="go('admin')">الإدارة ⚙️</button>
+  </nav>
+ </div>
 </header>
 
-<nav>
-<button onclick="showSection('home')">الرئيسية</button>
-<button class="secondary" onclick="showSection('cart')">السلة 🛒 <span id="cartCount">0</span></button>
-<button class="secondary" onclick="showSection('contact')">اتصل بنا</button>
-<button class="secondary" onclick="openAdmin()">الإدارة ⚙️</button>
-</nav>
-
-<main class="container">
-
+<main class="wrap">
 <section id="home">
-<div class="hero">
-<h1>مرحبا بك في <span style="color:#e6bd64">ZADX STORE</span></h1>
-<p>اكتشف خدماتنا الرقمية وبوتاتنا واطلب خدمتك بسهولة وأمان.</p>
-</div>
-<div class="status" id="connection">جاري الاتصال بقاعدة البيانات...</div>
-<h2>منتجاتنا وخدماتنا</h2>
-<div class="products" id="products">
-<p>جاري تحميل المنتجات...</p>
-</div>
+ <div class="hero">
+  <h1>ZADX STORE</h1>
+  <p>YOUR DIGITAL WORLD STARTS HERE</p>
+  <p>مرحبا بك في ZADX STORE — اكتشف خدماتنا الرقمية وبوتاتنا واطلب خدمتك بسهولة.</p>
+  <div id="dbStatus" class="status">جاري الاتصال بقاعدة البيانات...</div>
+ </div>
+ <h2 class="section-title">منتجاتنا وخدماتنا</h2>
+ <div id="products" class="grid"><div class="panel">جاري تحميل المنتجات...</div></div>
 </section>
 
 <section id="cart" hidden>
-<h2>🛒 سلة المشتريات</h2>
-<div class="panel">
-<div id="cartItems">السلة فارغة حاليا.</div>
-<h3 id="total">المجموع: 0 DA</h3>
-<button class="btn" onclick="showSection('checkout')">إكمال الطلب</button>
-<button class="btn dark" onclick="showSection('home')">متابعة التسوق</button>
-</div>
-</section>
-
-<section id="checkout" hidden>
-<h2>إتمام الطلب</h2>
-<div class="panel">
-<input id="customer" placeholder="اسمك الكامل">
-<input id="phone" placeholder="رقم هاتفك">
-<textarea id="note" placeholder="ملاحظات إضافية (اختياري)"></textarea>
-<h3>طريقة الدفع</h3>
-<select id="payment">
-<option>CCP / BaridiMob</option>
-<option>USDT</option>
-<option>Visa</option>
-</select>
-<div class="status">
-رقم الحساب CCP / BaridiMob:<br>
-<strong style="color:#e6bd64">00799999004313678088</strong>
-</div>
-<p class="small">يتم تأكيد الطلب والدفع يدوياً عبر الدعم.</p>
-<button class="btn" id="sendOrderBtn" onclick="sendOrder()">إرسال الطلب عبر Telegram</button>
-<button class="btn dark" onclick="showSection('cart')">رجوع للسلة</button>
-</div>
+ <h2 class="section-title">سلة المشتريات</h2>
+ <div class="panel">
+  <div id="cartItems"></div>
+  <div class="total" id="cartTotal">المجموع: 0</div>
+  <h3>إتمام الطلب</h3>
+  <div class="form-grid">
+   <div><label for="customerName">الاسم</label><input id="customerName" autocomplete="name" placeholder="اسمك"></div>
+   <div><label for="customerPhone">رقم الهاتف أو تيليغرام</label><input id="customerPhone" placeholder="وسيلة التواصل"></div>
+  </div>
+  <label for="payment">طريقة الدفع</label>
+  <select id="payment"><option value="CCP / BaridiMob">CCP / BaridiMob</option><option value="USDT">USDT</option><option value="Visa">Visa</option><option value="اتفاق مسبق">اتفاق مسبق</option></select>
+  <label for="orderNote">ملاحظة (اختياري)</label><textarea id="orderNote" placeholder="اكتب تفاصيل إضافية إن وجدت"></textarea>
+  <div class="notice">بعد إرسال الطلب، سيتم التواصل معك لتأكيد التفاصيل وطريقة الدفع.</div>
+  <button class="primary" id="sendOrderBtn" onclick="sendOrder()">إرسال الطلب</button>
+  <div id="checkoutMsg" class="status"></div>
+ </div>
 </section>
 
 <section id="contact" hidden>
-<h2>الدعم والمساعدة</h2>
-<div class="panel">
-<p>للاستفسارات ومتابعة الطلبات تواصل معنا:</p>
-<a href="https://t.me/ZADX_PRO">@ZADX_PRO</a>
-</div>
+ <h2 class="section-title">اتصل بنا</h2>
+ <div class="panel">
+  <p>للاستفسار أو متابعة الطلب، تواصل معنا عبر تيليغرام:</p>
+  <p><a href="https://t.me/ZADX_PRO" target="_blank" rel="noopener">@ZADX_PRO</a></p>
+ </div>
 </section>
 
-<!-- تسجيل دخول الإدارة -->
-<section id="adminLogin" hidden>
-<h2>🔐 دخول الإدارة</h2>
-<div class="panel">
-<p class="small">هذه الصفحة مخصصة لمسؤول المتجر فقط.</p>
-<label>البريد الإلكتروني</label>
-<input id="adminEmail" type="email" value="Aminhamidd1999@gmail.com">
-<label>كلمة المرور</label>
-<input id="adminPassword" type="password" placeholder="كلمة مرور حساب Supabase">
-<button class="btn" id="loginBtn" onclick="adminLogin()">تسجيل الدخول</button>
-<button class="btn dark" onclick="showSection('home')">رجوع للمتجر</button>
-<p id="loginMessage" class="small"></p>
-</div>
+<section id="admin" hidden>
+ <h2 class="section-title">لوحة الإدارة</h2>
+ <div id="loginBox" class="panel">
+  <p class="muted">سجّل الدخول بحساب الإدارة المرتبط بـ Supabase Auth.</p>
+  <label for="adminEmail">البريد الإلكتروني</label><input id="adminEmail" type="email" autocomplete="username" value="aminhamidd1999@gmail.com">
+  <label for="adminPassword">كلمة المرور</label><input id="adminPassword" type="password" autocomplete="current-password" placeholder="كلمة مرور حساب الإدارة">
+  <div class="actions"><button class="primary" onclick="adminLogin()">تسجيل الدخول</button></div>
+  <div id="loginMsg" class="status"></div>
+ </div>
+ <div id="adminPanel" hidden>
+  <div class="row" style="justify-content:space-between"><span id="adminWelcome" class="success"></span><button class="btn" onclick="adminLogout()">تسجيل الخروج</button></div>
+  <div class="admin-tabs"><button onclick="showAdminTab('manageProducts')">المنتجات</button><button onclick="showAdminTab('manageOrders')">الطلبات</button></div>
+  <div id="manageProducts">
+   <div class="panel">
+    <h3>إضافة / تعديل منتج</h3>
+    <input id="editProductId" type="hidden">
+    <div class="form-grid">
+     <div><label for="productName">اسم المنتج</label><input id="productName" placeholder="اسم المنتج"></div>
+     <div><label for="productPrice">السعر</label><input id="productPrice" type="number" min="0" step="0.01" placeholder="السعر"></div>
+     <div><label for="productIcon">الأيقونة</label><input id="productIcon" placeholder="🤖"></div>
+    </div>
+    <label for="productDescription">الوصف</label><textarea id="productDescription" placeholder="وصف المنتج"></textarea>
+    <div class="actions"><button class="primary" onclick="saveProduct()">حفظ المنتج</button><button class="btn" onclick="clearProductForm()">إفراغ الحقول</button></div>
+    <div id="productMsg" class="status"></div>
+   </div>
+   <h3 class="section-title">المنتجات الحالية</h3><div id="adminProducts" class="grid"></div>
+  </div>
+  <div id="manageOrders" hidden><h3 class="section-title">الطلبات</h3><div id="adminOrders"></div></div>
+ </div>
 </section>
-
-<!-- لوحة الإدارة -->
-<section id="adminPanel" hidden>
-<h2>⚙️ لوحة تحكم ZADX</h2>
-<div class="status">
-تم تسجيل الدخول إلى لوحة الإدارة.
-<br>
-البريد: Aminhamidd1999@gmail.com
-</div>
-
-<div class="admin-actions">
-<button class="btn" onclick="loadAdminData()">تحديث البيانات</button>
-<button class="btn dark" onclick="adminLogout()">تسجيل الخروج</button>
-</div>
-
-<hr>
-
-<h2>📦 إدارة المنتجات</h2>
-<div class="panel">
-<h3 id="productFormTitle">إضافة منتج جديد</h3>
-<input id="editProductId" type="hidden">
-<label>اسم المنتج</label>
-<input id="productName" placeholder="اسم المنتج">
-<label>وصف المنتج</label>
-<textarea id="productDescription" placeholder="وصف المنتج"></textarea>
-<label>السعر بالدينار</label>
-<input id="productPrice" type="number" min="0" placeholder="السعر">
-<label>الأيقونة أو Emoji</label>
-<input id="productIcon" placeholder="مثال: ⭐">
-<button class="btn" id="saveProductBtn" onclick="saveProduct()">حفظ المنتج</button>
-<button class="btn dark" onclick="clearProductForm()">إلغاء التعديل</button>
-</div>
-
-<h3>المنتجات الحالية</h3>
-<div id="adminProducts">
-<p class="small">جاري تحميل المنتجات...</p>
-</div>
-
-<hr>
-
-<h2>🛒 إدارة الطلبات</h2>
-<p class="small">الطلبات الجديدة التي تم حفظها في قاعدة البيانات ستظهر هنا.</p>
-<div id="adminOrders">
-<p class="small">جاري تحميل الطلبات...</p>
-</div>
-</section>
-
 </main>
-
-<footer>
-ZADX STORE © 2026
-<br><br>
-All rights reserved.
-</footer>
+<footer>ZADX STORE © 2026 — جميع الحقوق محفوظة</footer>
 
 <script>
-const SUPABASE_URL="https://iyxxesftwprdrbxspdfb.supabase.co";
-const SUPABASE_KEY="sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
-const ADMIN_EMAIL="aminhamidd1999@gmail.com";
+const SUPABASE_URL = "https://iyxxesftwprdrbxspdfb.supabase.co";
+const SUPABASE_KEY = "sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
+const ADMIN_EMAIL = "aminhamidd1999@gmail.com";
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+let products = [];
+let cart = [];
+let currentSession = null;
 
-let products=[];
-let cart=[];
-let adminUser=null;
-
-function showSection(id){
-document.querySelectorAll("main section").forEach(s=>s.hidden=true);
-document.getElementById(id).hidden=false;
-
-if(id==="cart")renderCart();
-window.scrollTo(0,0);
+function escapeHTML(value){
+ return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 }
-
-function safe(value){
-return String(value??"").replace(/[&<>"']/g,c=>({
-"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-}[c]));
+function go(section){
+ ["home","cart","contact","admin"].forEach(id => document.getElementById(id).hidden = id !== section);
+ if(section==="cart") renderCart();
+ if(section==="admin") checkAdminSession();
+ window.scrollTo({top:0,behavior:"smooth"});
 }
-
+function money(value){return Number(value||0).toLocaleString("en-US")+" DA";}
+function setStatus(id,message,type=""){
+ const el=document.getElementById(id); if(!el)return;
+ el.textContent=message; el.className="status "+type;
+}
 async function loadProducts(){
-const status=document.getElementById("connection");
-
-try{
-const {data,error}=await db
-.from("products")
-.select("id,name,description,price,icon");
-
-if(error)throw error;
-
-products=data||[];
-status.textContent="متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+products.length;
-
-const box=document.getElementById("products");
-
-if(!products.length){
-box.innerHTML="<p>لا توجد منتجات حاليا.</p>";
-return;
+ const status=document.getElementById("dbStatus");
+ try{
+  const {data,error}=await supabaseClient.from("products").select("id,name,description,price,icon").order("id",{ascending:false});
+  if(error)throw error;
+  products=data||[];
+  status.textContent="متصل بقاعدة البيانات ✓"; status.className="status success";
+  renderProducts();
+ }catch(error){
+  status.textContent="تعذر تحميل المنتجات: "+error.message; status.className="status error";
+  document.getElementById("products").innerHTML='<div class="panel">لم نتمكن من تحميل المنتجات. تحقق من اتصال Supabase.</div>';
+ }
 }
-
-box.innerHTML=products.map(p=>`
-<div class="product">
-<div class="emoji">${safe(p.icon||"⭐")}</div>
-<h3>${safe(p.name)}</h3>
-<p>${safe(p.description||"خدمة رقمية مميزة من ZADX STORE")}</p>
-<div class="price">${safe(p.price)} DA</div>
-<button class="btn" onclick="addToCart('${safe(p.id)}')">أضف إلى السلة</button>
-</div>
-`).join("");
-
-}catch(error){
-status.textContent="خطأ الاتصال: "+error.message;
-document.getElementById("products").innerHTML=
-"<p>تعذر تحميل المنتجات. تحقق من صلاحيات قاعدة البيانات.</p>";
+function productCard(p,admin=false){
+ return `<article class="product"><div class="icon">${escapeHTML(p.icon||"✨")}</div><h3>${escapeHTML(p.name)}</h3><p>${escapeHTML(p.description||"")}</p><div class="price">${money(p.price)}</div>${admin?`<div class="actions"><button class="btn" onclick="editProduct('${String(p.id).replace(/'/g,"")}')">تعديل</button><button class="danger" onclick="deleteProduct('${String(p.id).replace(/'/g,"")}')">حذف</button></div>`:`<button class="primary" onclick="addToCart('${String(p.id).replace(/'/g,"")}')">أضف إلى السلة</button>`}</article>`;
 }
+function renderProducts(){
+ const el=document.getElementById("products");
+ el.innerHTML=products.length?products.map(p=>productCard(p)).join(""):'<div class="panel">لا توجد منتجات حاليًا. سيتم عرض المنتجات عند إضافتها من لوحة الإدارة.</div>';
 }
-
 function addToCart(id){
-const product=products.find(p=>String(p.id)===String(id));
-if(!product)return;
-
-const found=cart.find(x=>String(x.id)===String(id));
-if(found)found.quantity++;
-else cart.push({...product,quantity:1});
-
-updateCount();
-alert("تمت إضافة المنتج إلى السلة ✓");
+ const p=products.find(x=>String(x.id)===String(id)); if(!p)return;
+ const found=cart.find(x=>String(x.id)===String(id));
+ if(found)found.quantity++; else cart.push({id:p.id,name:p.name,price:Number(p.price),quantity:1});
+ updateCartCount(); renderCart();
 }
-
-function updateCount(){
-document.getElementById("cartCount").textContent=
-cart.reduce((sum,p)=>sum+p.quantity,0);
-}
-
+function updateCartCount(){document.getElementById("cartCount").textContent=cart.reduce((s,x)=>s+x.quantity,0)}
 function renderCart(){
-const box=document.getElementById("cartItems");
-
-if(!cart.length){
-box.innerHTML="السلة فارغة حاليا.";
-document.getElementById("total").textContent="المجموع: 0 DA";
-return;
+ const el=document.getElementById("cartItems");
+ if(!cart.length)el.innerHTML='<p class="muted">السلة فارغة حاليًا.</p>';
+ else el.innerHTML=cart.map((x,i)=>`<div class="cart-line row" style="justify-content:space-between"><div><strong>${escapeHTML(x.name)}</strong><div class="small">${money(x.price)} × ${x.quantity}</div></div><div class="qty"><button onclick="changeQty(${i},-1)">−</button><b>${x.quantity}</b><button onclick="changeQty(${i},1)">+</button><button class="danger" onclick="removeCartItem(${i})">حذف</button></div></div>`).join("");
+ document.getElementById("cartTotal").textContent="المجموع: "+money(cart.reduce((s,x)=>s+x.price*x.quantity,0));
 }
+function changeQty(i,n){if(!cart[i])return;cart[i].quantity+=n;if(cart[i].quantity<=0)cart.splice(i,1);updateCartCount();renderCart()}
+function removeCartItem(i){cart.splice(i,1);updateCartCount();renderCart()}
 
-box.innerHTML=cart.map((p,i)=>`
-<div class="cart-item">
-<div>
-<strong>${safe(p.name)}</strong>
-<div class="small">${safe(p.price)} DA × ${p.quantity}</div>
-</div>
-<div>
-<button onclick="changeQty(${i},1)">+</button>
-<button onclick="changeQty(${i},-1)">−</button>
-</div>
-</div>
-`).join("");
-
-const total=cart.reduce((s,p)=>s+Number(p.price)*p.quantity,0);
-document.getElementById("total").textContent="المجموع: "+total+" DA";
-}
-
-function changeQty(index,amount){
-cart[index].quantity+=amount;
-if(cart[index].quantity<=0)cart.splice(index,1);
-updateCount();
-renderCart();
-}
-
-// إرسال الطلب وحفظه في Supabase وTelegram
 async function sendOrder(){
-if(!cart.length){
-alert("السلة فارغة!");
-return;
+ const name=document.getElementById("customerName").value.trim();
+ const phone=document.getElementById("customerPhone").value.trim();
+ const payment=document.getElementById("payment").value;
+ const note=document.getElementById("orderNote").value.trim();
+ const msg=document.getElementById("checkoutMsg");
+ if(!cart.length){setStatus("checkoutMsg","السلة فارغة.","error");return}
+ if(!name||!phone){setStatus("checkoutMsg","أدخل الاسم ورقم التواصل من فضلك.","error");return}
+ const total=cart.reduce((s,x)=>s+x.price*x.quantity,0);
+ const items=cart.map(x=>({id:x.id,name:x.name,price:x.price,quantity:x.quantity}));
+ const btn=document.getElementById("sendOrderBtn");btn.disabled=true;btn.textContent="جاري إرسال الطلب...";
+ try{
+  const {data,error}=await supabaseClient.from("orders").insert([{customer_name:name,phone,note,payment,items,total}]).select("id").single();
+  if(error)throw error;
+  const orderId=data?.id||"غير متوفر";
+  const lines=items.map(x=>`• ${x.name} × ${x.quantity} — ${money(x.price*x.quantity)}`).join("\n");
+  const message=`طلب جديد من ZADX STORE\nرقم الطلب: ${orderId}\nالاسم: ${name}\nالتواصل: ${phone}\nالدفع: ${payment}\nالمنتجات:\n${lines}\nالمجموع: ${money(total)}\nملاحظة: ${note||"لا توجد"}`;
+  try{await supabaseClient.functions.invoke("send_telegram_order",{body:{message}})}catch(telegramError){console.warn("Telegram notification:",telegramError)}
+  cart=[];updateCartCount();renderCart();
+  document.getElementById("customerName").value="";document.getElementById("customerPhone").value="";document.getElementById("orderNote").value="";
+  setStatus("checkoutMsg","تم إرسال طلبك بنجاح! احتفظ برقم الطلب: "+orderId,"success");
+ }catch(error){setStatus("checkoutMsg","لم يتم إرسال الطلب: "+error.message,"error")}
+ finally{btn.disabled=false;btn.textContent="إرسال الطلب"}
 }
 
-const name=document.getElementById("customer").value.trim();
-const phone=document.getElementById("phone").value.trim();
-const note=document.getElementById("note").value.trim();
-const payment=document.getElementById("payment").value;
-const button=document.getElementById("sendOrderBtn");
-
-if(!name||!phone){
-alert("أدخل اسمك ورقم هاتفك.");
-return;
-}
-
-const total=cart.reduce((s,p)=>s+Number(p.price)*p.quantity,0);
-
-const items=cart.map(p=>({
-id:p.id,
-name:p.name,
-price:Number(p.price),
-quantity:p.quantity
-}));
-
-button.disabled=true;
-button.textContent="جاري حفظ وإرسال الطلب...";
-
-try{
-
-// حفظ الطلب في قاعدة البيانات
-const {error:saveError}=await db
-.from("orders")
-.insert({
-customer_name:name,
-phone:phone,
-note:note,
-payment:payment,
-items:items,
-total:total
-});
-
-if(saveError)throw new Error("تعذر حفظ الطلب: "+saveError.message);
-
-// تجهيز رسالة Telegram
-let message="🛒 طلب جديد - ZADX STORE\n";
-message+="الاسم: "+name+"\n";
-message+="الهاتف: "+phone+"\n";
-message+="الدفع: "+payment+"\n";
-message+="المنتجات:\n";
-
-items.forEach(p=>{
-message+=p.name+" × "+p.quantity+" = "+
-(p.price*p.quantity)+" DA\n";
-});
-
-message+="المجموع: "+total+" DA\n";
-message+="ملاحظات: "+note;
-
-// إرسال Telegram
-const {data,error}=await db.functions.invoke(
-"send_telegram_order",
-{body:{message}}
-);
-
-if(error)throw new Error("تم حفظ الطلب، لكن تعذر إرساله إلى Telegram: "+error.message);
-if(!data||!data.success)throw new Error("تم حفظ الطلب، لكن Telegram لم يؤكد الإرسال.");
-
-alert("تم حفظ طلبك وإرساله بنجاح ✓");
-
-cart=[];
-updateCount();
-renderCart();
-
-document.getElementById("customer").value="";
-document.getElementById("phone").value="";
-document.getElementById("note").value="";
-showSection("home");
-
-}catch(error){
-console.error("Order error:",error);
-alert(error.message||"حدث خطأ أثناء إرسال الطلب.");
-}finally{
-button.disabled=false;
-button.textContent="إرسال الطلب عبر Telegram";
-}
-}
-
-// فتح لوحة الإدارة
-async function openAdmin(){
-showSection("adminLogin");
-document.getElementById("loginMessage").textContent="";
-
-const {data}=await db.auth.getSession();
-const user=data?.session?.user;
-
-if(user && user.email?.toLowerCase()===ADMIN_EMAIL){
-adminUser=user;
-await showAdminPanel();
-}
-}
-
-// تسجيل الدخول
 async function adminLogin(){
-const email=document.getElementById("adminEmail").value.trim();
-const password=document.getElementById("adminPassword").value;
-const message=document.getElementById("loginMessage");
-const button=document.getElementById("loginBtn");
-
-if(email.toLowerCase()!==ADMIN_EMAIL){
-message.textContent="هذا البريد غير مصرح له بالدخول.";
-return;
+ const email=document.getElementById("adminEmail").value.trim().toLowerCase();
+ const password=document.getElementById("adminPassword").value;
+ if(email!==ADMIN_EMAIL){setStatus("loginMsg","هذا البريد ليس بريد الإدارة المعتمد.","error");return}
+ if(!password){setStatus("loginMsg","أدخل كلمة المرور.","error");return}
+ setStatus("loginMsg","جاري تسجيل الدخول...");
+ try{
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  currentSession=data.session;
+  await showAdminPanel();
+ }catch(error){setStatus("loginMsg","فشل تسجيل الدخول: "+error.message,"error")}
 }
-
-if(!password){
-message.textContent="أدخل كلمة المرور.";
-return;
-}
-
-button.disabled=true;
-button.textContent="جاري تسجيل الدخول...";
-message.textContent="";
-
-try{
-const {data,error}=await db.auth.signInWithPassword({
-email:email,
-password:password
-});
-
-if(error)throw error;
-
-if(!data.user||data.user.email?.toLowerCase()!==ADMIN_EMAIL){
-await db.auth.signOut();
-throw new Error("هذا الحساب غير مصرح له.");
-}
-
-adminUser=data.user;
-document.getElementById("adminPassword").value="";
-await showAdminPanel();
-
-}catch(error){
-message.textContent="فشل الدخول: "+error.message;
-}finally{
-button.disabled=false;
-button.textContent="تسجيل الدخول";
-}
-}
-
-async function showAdminPanel(){
-if(!adminUser || adminUser.email?.toLowerCase()!==ADMIN_EMAIL){
-showSection("adminLogin");
-return;
-}
-
-showSection("adminPanel");
-await loadAdminData();
-}
-
-async function adminLogout(){
-await db.auth.signOut();
-adminUser=null;
-showSection("home");
-alert("تم تسجيل الخروج.");
-}
-
-// تحميل بيانات لوحة الإدارة
-async function loadAdminData(){
-if(!adminUser)return;
-
-await loadProducts();
-
-const productBox=document.getElementById("adminProducts");
-const orderBox=document.getElementById("adminOrders");
-
-productBox.innerHTML="<p class='small'>جاري تحميل المنتجات...</p>";
-orderBox.innerHTML="<p class='small'>جاري تحميل الطلبات...</p>";
-
-const {data:productData,error:productError}=await db
-.from("products")
-.select("id,name,description,price,icon");
-
-if(productError){
-productBox.textContent="خطأ تحميل المنتجات: "+productError.message;
-}else{
-productBox.innerHTML=(productData||[]).map(p=>`
-<div class="admin-product">
-<div style="font-size:28px">${safe(p.icon||"⭐")}</div>
-<h3>${safe(p.name)}</h3>
-<p class="small">${safe(p.description||"")}</p>
-<p class="price">${safe(p.price)} DA</p>
-<div class="admin-actions">
-<button class="btn" onclick="editProduct('${safe(p.id)}')">تعديل</button>
-<button class="btn danger" onclick="deleteProduct('${safe(p.id)}')">حذف</button>
-</div>
-</div>
-`).join("")||"<p>لا توجد منتجات.</p>";
-}
-
-const {data:orders,error:ordersError}=await db
-.from("orders")
-.select("*")
-.order("created_at",{ascending:false});
-
-if(ordersError){
-orderBox.textContent="خطأ تحميل الطلبات: "+ordersError.message;
-return;
-}
-
-if(!orders||!orders.length){
-orderBox.innerHTML="<p class='small'>لا توجد طلبات محفوظة حاليا.</p>";
-return;
-}
-
-orderBox.innerHTML=orders.map(o=>{
-let itemsText="";
-
-if(Array.isArray(o.items)){
-itemsText=o.items.map(item=>
-safe(item.name)+" × "+safe(item.quantity)+
-" = "+safe(Number(item.price)*Number(item.quantity))+" DA"
-).join("<br>");
-}
-
-return `
-<div class="order-card">
-<h3>طلب رقم: ${safe(o.id)}</h3>
-<p>
-<strong>الاسم:</strong> ${safe(o.customer_name)}<br>
-<strong>الهاتف:</strong> ${safe(o.phone)}<br>
-<strong>الدفع:</strong> ${safe(o.payment)}<br>
-<strong>التاريخ:</strong> ${safe(new Date(o.created_at).toLocaleString("ar-DZ"))}
-</p>
-<hr>
-<strong>المنتجات:</strong>
-<p>${itemsText}</p>
-<strong style="color:#e6bd64">المجموع: ${safe(o.total)} DA</strong>
-<p><strong>ملاحظات:</strong> ${safe(o.note||"لا توجد")}</p>
-<label>حالة الطلب</label>
-<select onchange="updateOrderStatus('${safe(o.id)}',this.value)">
-<option value="جديد" ${o.status==="جديد"?"selected":""}>جديد</option>
-<option value="قيد المعالجة" ${o.status==="قيد المعالجة"?"selected":""}>قيد المعالجة</option>
-<option value="مكتمل" ${o.status==="مكتمل"?"selected":""}>مكتمل</option>
-<option value="ملغي" ${o.status==="ملغي"?"selected":""}>ملغي</option>
-</select>
-</div>
-`;
-}).join("");
-}
-
-// إضافة أو تعديل منتج
-async function saveProduct(){
-if(!adminUser)return;
-
-const id=document.getElementById("editProductId").value;
-const name=document.getElementById("productName").value.trim();
-const description=document.getElementById("productDescription").value.trim();
-const price=Number(document.getElementById("productPrice").value);
-const icon=document.getElementById("productIcon").value.trim()||"⭐";
-
-if(!name||!Number.isFinite(price)||price<0){
-alert("أدخل اسم المنتج وسعراً صحيحاً.");
-return;
-}
-
-const record={name,description,price,icon};
-
-let result;
-
-if(id){
-result=await db.from("products").update(record).eq("id",id);
-}else{
-result=await db.from("products").insert(record);
-}
-
-if(result.error){
-alert("تعذر حفظ المنتج: "+result.error.message);
-return;
-}
-
-alert(id?"تم تعديل المنتج بنجاح ✓":"تمت إضافة المنتج بنجاح ✓");
-clearProductForm();
-await loadAdminData();
-}
-
-function editProduct(id){
-const p=products.find(x=>String(x.id)===String(id));
-if(!p)return;
-
-document.getElementById("editProductId").value=p.id;
-document.getElementById("productName").value=p.name||"";
-document.getElementById("productDescription").value=p.description||"";
-document.getElementById("productPrice").value=p.price||0;
-document.getElementById("productIcon").value=p.icon||"";
-document.getElementById("productFormTitle").textContent="تعديل المنتج";
-document.getElementById("saveProductBtn").textContent="حفظ التعديلات";
-
-document.getElementById("productFormTitle").scrollIntoView({behavior:"smooth"});
-}
-
-function clearProductForm(){
-document.getElementById("editProductId").value="";
-document.getElementById("productName").value="";
-document.getElementById("productDescription").value="";
-document.getElementById("productPrice").value="";
-document.getElementById("productIcon").value="";
-document.getElementById("productFormTitle").textContent="إضافة منتج جديد";
-document.getElementById("saveProductBtn").textContent="حفظ المنتج";
-}
-
-async function deleteProduct(id){
-if(!adminUser)return;
-if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
-
-const {error}=await db.from("products").delete().eq("id",id);
-
-if(error){
-alert("تعذر حذف المنتج: "+error.message);
-return;
-}
-
-alert("تم حذف المنتج.");
-await loadAdminData();
-}
-
-// تغيير حالة الطلب
-async function updateOrderStatus(id,status){
-if(!adminUser)return;
-
-const {error}=await db
-.from("orders")
-.update({status:status})
-.eq("id",id);
-
-if(error){
-alert("تعذر تحديث حالة الطلب: "+error.message);
-return;
-}
-
-alert("تم تحديث حالة الطلب ✓");
-}
-
-// استعادة جلسة الإدارة عند فتح الموقع
 async function checkAdminSession(){
-const {data}=await db.auth.getSession();
-const user=data?.session?.user;
-
-if(user && user.email?.toLowerCase()===ADMIN_EMAIL){
-adminUser=user;
-}else{
-adminUser=null;
+ try{
+  const {data}=await supabaseClient.auth.getSession();
+  currentSession=data.session;
+  if(currentSession && currentSession.user.email?.toLowerCase()===ADMIN_EMAIL)await showAdminPanel();
+  else{document.getElementById("loginBox").hidden=false;document.getElementById("adminPanel").hidden=true}
+ }catch(e){console.error(e)}
 }
+async function showAdminPanel(){
+ const {data}=await supabaseClient.auth.getUser();
+ if(!data.user||data.user.email?.toLowerCase()!==ADMIN_EMAIL){
+  await supabaseClient.auth.signOut();document.getElementById("loginBox").hidden=false;document.getElementById("adminPanel").hidden=true;
+  setStatus("loginMsg","هذا الحساب غير مخوّل للإدارة.","error");return;
+ }
+ document.getElementById("loginBox").hidden=true;document.getElementById("adminPanel").hidden=false;
+ document.getElementById("adminWelcome").textContent="تم تسجيل الدخول: "+data.user.email;
+ await loadAdminData();
 }
-
+async function adminLogout(){await supabaseClient.auth.signOut();currentSession=null;document.getElementById("loginBox").hidden=false;document.getElementById("adminPanel").hidden=true;document.getElementById("adminPassword").value="";setStatus("loginMsg","تم تسجيل الخروج.","success")}
+function showAdminTab(tab){
+ document.getElementById("manageProducts").hidden=tab!=="manageProducts";
+ document.getElementById("manageOrders").hidden=tab!=="manageOrders";
+}
+async function loadAdminData(){await loadAdminProducts();await loadAdminOrders()}
+async function loadAdminProducts(){
+ const el=document.getElementById("adminProducts");el.textContent="جاري تحميل المنتجات...";
+ const {data,error}=await supabaseClient.from("products").select("id,name,description,price,icon").order("id",{ascending:false});
+ if(error){el.textContent="خطأ: "+error.message;return}
+ products=data||[];renderProducts();el.innerHTML=products.length?products.map(p=>productCard(p,true)).join(""):'<div class="panel">لا توجد منتجات.</div>';
+}
+function clearProductForm(){["editProductId","productName","productPrice","productIcon","productDescription"].forEach(id=>document.getElementById(id).value="");setStatus("productMsg","")}
+function editProduct(id){
+ const p=products.find(x=>String(x.id)===String(id));if(!p)return;
+ document.getElementById("editProductId").value=p.id;document.getElementById("productName").value=p.name||"";
+ document.getElementById("productPrice").value=p.price??"";document.getElementById("productIcon").value=p.icon||"";
+ document.getElementById("productDescription").value=p.description||"";
+ window.scrollTo({top:document.getElementById("manageProducts").offsetTop,behavior:"smooth"});
+}
+async function saveProduct(){
+ const id=document.getElementById("editProductId").value;
+ const name=document.getElementById("productName").value.trim();
+ const price=Number(document.getElementById("productPrice").value);
+ const icon=document.getElementById("productIcon").value.trim()||"✨";
+ const description=document.getElementById("productDescription").value.trim();
+ if(!name||!Number.isFinite(price)||price<0){setStatus("productMsg","أدخل اسمًا وسعرًا صحيحًا.","error");return}
+ const payload={name,price,icon,description};
+ try{
+  const result=id?await supabaseClient.from("products").update(payload).eq("id",id):await supabaseClient.from("products").insert([payload]);
+  if(result.error)throw result.error;
+  setStatus("productMsg","تم حفظ المنتج بنجاح.","success");clearProductForm();await loadAdminProducts();
+ }catch(error){setStatus("productMsg","تعذر الحفظ: "+error.message,"error")}
+}
+async function deleteProduct(id){
+ if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
+ const {error}=await supabaseClient.from("products").delete().eq("id",id);
+ if(error){alert("تعذر الحذف: "+error.message);return}
+ await loadAdminProducts();
+}
+async function loadAdminOrders(){
+ const el=document.getElementById("adminOrders");el.textContent="جاري تحميل الطلبات...";
+ const {data,error}=await supabaseClient.from("orders").select("id,customer_name,phone,note,payment,items,total,status,created_at").order("created_at",{ascending:false});
+ if(error){el.textContent="تعذر تحميل الطلبات: "+error.message;return}
+ if(!data?.length){el.innerHTML='<div class="panel">لا توجد طلبات حتى الآن.</div>';return}
+ el.innerHTML=data.map(o=>{
+  const itemText=Array.isArray(o.items)?o.items.map(x=>`${escapeHTML(x.name)} × ${escapeHTML(x.quantity)}`).join("، "):"";
+  const date=o.created_at?new Date(o.created_at).toLocaleString("ar-DZ"):"";
+  return `<article class="panel order"><div class="row" style="justify-content:space-between"><strong>طلب #${escapeHTML(String(o.id).slice(0,8))}</strong><span class="small">${escapeHTML(date)}</span></div>
+  <p>الاسم: ${escapeHTML(o.customer_name)} | التواصل: ${escapeHTML(o.phone)}</p><p>المنتجات: ${itemText}</p><p>الدفع: ${escapeHTML(o.payment)} | المجموع: <b class="price">${money(o.total)}</b></p><p>ملاحظة: ${escapeHTML(o.note||"لا توجد")}</p>
+  <div class="row"><label style="margin:0">الحالة</label><select id="status-${escapeHTML(o.id)}" style="max-width:190px"><option ${o.status==="جديد"?"selected":""}>جديد</option><option ${o.status==="قيد المعالجة"?"selected":""}>قيد المعالجة</option><option ${o.status==="مكتمل"?"selected":""}>مكتمل</option><option ${o.status==="ملغي"?"selected":""}>ملغي</option></select><button class="primary" onclick="updateOrderStatus('${String(o.id).replace(/'/g,"")}')">حفظ الحالة</button></div>
+  </article>`;
+ }).join("");
+}
+async function updateOrderStatus(id){
+ const status=document.getElementById("status-"+id).value;
+ const {error}=await supabaseClient.from("orders").update({status}).eq("id",id);
+ if(error){alert("تعذر تحديث الحالة: "+error.message);return}
+ alert("تم تحديث حالة الطلب.");await loadAdminOrders();
+}
+supabaseClient.auth.onAuthStateChange((_event,session)=>{currentSession=session});
 loadProducts();
-checkAdminSession();
 </script>
-
 </body>
 </html>
