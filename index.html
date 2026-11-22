@@ -1,462 +1,262 @@
+
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#090909">
 <title>ZADX STORE</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
+body{margin:0;background:#090909;color:#fff;font-family:Arial,sans-serif}
+header{padding:22px 16px;text-align:center;border-bottom:1px solid #292318}
+.logo{font-size:30px;font-weight:900;color:#e6bd64;letter-spacing:2px}
+header p{color:#aaa;font-size:13px}
+nav{display:flex;justify-content:center;gap:10px;padding:15px;flex-wrap:wrap}
+button{cursor:pointer}
+nav button,.btn{background:#d9ad50;color:#111;border:0;padding:12px 18px;border-radius:9px;font-weight:bold}
+nav button.secondary{background:#222;color:#fff}
+.container{max-width:1000px;margin:auto;padding:18px}
+h2{color:#e6bd64}
+.hero{text-align:center;padding:28px 10px}
+.hero h1{font-size:27px}
+.hero p{color:#aaa;line-height:1.8}
+.status{background:#171717;border:1px solid #333;padding:12px;border-radius:10px;color:#ccc;font-size:13px;margin-bottom:20px}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:15px}
+.product,.panel{background:#151515;border:1px solid #30291d;border-radius:13px;padding:17px}
+.product .emoji{font-size:35px}
+.product h3{margin:12px 0;color:#f1d28c}
+.product p{color:#aaa;line-height:1.6;font-size:14px;min-height:40px}
+.price{color:#e6bd64;font-size:20px;font-weight:bold;margin:15px 0}
+.btn{width:100%;margin-top:8px}
+.btn.dark{background:#292929;color:white}
+input,textarea,select{width:100%;padding:13px;margin:7px 0;background:#101010;color:white;border:1px solid #444;border-radius:8px;font-size:15px}
+.cart-item{display:flex;justify-content:space-between;gap:10px;padding:12px 0;border-bottom:1px solid #333}
+.small{color:#aaa;font-size:13px}
+footer{text-align:center;padding:30px;color:#777;font-size:13px}
 [hidden]{display:none!important}
-body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif}
-header{padding:18px 15px;background:#111;border-bottom:1px solid #b58b35;display:flex;justify-content:space-between;align-items:center;gap:8px}
-.logo{font-size:22px;font-weight:bold;color:#e5b84c}
-.logo span{color:white}
-.header-actions{display:flex;gap:8px;align-items:center}
-.cart,.admin-btn{padding:10px 12px;border:0;border-radius:9px;font-weight:bold}
-.cart{background:#e5b84c;color:#111}
-.admin-btn{background:#292929;color:#e5b84c;border:1px solid #80632e}
-.hero{text-align:center;padding:48px 16px;background:linear-gradient(140deg,#17130a,#090909 65%)}
-.hero h1{color:#e5b84c;font-size:30px}
-.hero p{color:#bbb;line-height:1.8}
-.btn{display:inline-block;background:#d9aa3e;color:#111;padding:12px 20px;border:0;border-radius:9px;font-weight:bold;cursor:pointer;text-decoration:none}
-.btn:disabled{opacity:.6;cursor:wait}
-.section{padding:24px 15px}
-.section h2,.cartbox h2,.admin-panel h2{color:#e5b84c}
-.products{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-.product,.admin-panel,.login-panel,.cartbox,.stat-card,.order-card{background:#171717;border:1px solid #49391f;border-radius:13px;padding:15px}
-.symbol{font-size:30px;margin-bottom:10px}
-.product h3{font-size:16px}
-.product p{font-size:13px;color:#aaa;line-height:1.6;min-height:40px}
-.price{color:#e5b84c;font-weight:bold;margin:12px 0}
-.product button{width:100%;padding:10px;border:0;border-radius:8px;background:#d9aa3e;font-weight:bold;cursor:pointer}
-.product .edit-btn{background:#444;color:white;margin-top:7px}
-.product .delete-btn{background:#8d3030;color:white;margin-top:7px}
-.cartbox{margin:15px}
-.cart-item{padding:10px 0;border-bottom:1px solid #333;display:flex;justify-content:space-between;gap:8px}
-.remove{background:#9d3434;color:white;border:0;padding:7px;border-radius:5px}
-.admin-panel,.login-panel{margin:15px}
-input,textarea{width:100%;padding:12px;margin:7px 0 13px;background:#090909;color:white;border:1px solid #70552a;border-radius:8px;font-size:15px}
-label{color:#ddd;font-size:14px}
-.admin-actions{display:flex;gap:8px;flex-wrap:wrap}
-.admin-actions button{flex:1}
-.secondary{background:#444;color:white}
-.danger{background:#963333;color:white}
-.status{color:#aaa;font-size:12px;line-height:1.7;overflow-wrap:anywhere}
-footer{text-align:center;padding:25px;color:#888;border-top:1px solid #292929}
-.empty{color:#999}
-.stats-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:15px 0}
-.stat-card{text-align:center}
-.stat-card p{color:#aaa;font-size:13px}
-.stat-card h2{font-size:27px;margin:8px 0;color:#e5b84c}
-.order-card{margin:10px 0}
-.order-card p{color:#ccc;line-height:1.8;font-size:13px}
-.order-actions{display:flex;gap:8px;margin-top:10px}
-.order-actions button{flex:1;padding:10px;border:0;border-radius:8px;font-weight:bold;cursor:pointer}
-.confirm-btn{background:#287b4b;color:white}
-.order-pending{color:#e5b84c}
-.order-confirmed{color:#54c77d}
-@media(max-width:360px){.products{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
+
 <header>
-<div class="logo">ZADX <span>STORE</span></div>
-<div class="header-actions">
-<button class="admin-btn" id="adminToggle">⚙️ ADMIN</button>
-<div class="cart">🛒 <span id="count">0</span></div>
-</div>
+<div class="logo">ZADX STORE</div>
+<p>YOUR DIGITAL WORLD STARTS HERE</p>
 </header>
 
-<section class="hero">
-<h1>مرحبا بك في ZADX STORE</h1>
-<p>وجهتك للخدمات الرقمية والبوتات والحلول الإلكترونية<br>جودة، احترافية وسهولة في الطلب</p>
-<a href="#products" class="btn">اكتشف خدماتنا</a>
-</section>
+<nav>
+<button onclick="showSection('home')">الرئيسية</button>
+<button class="secondary" onclick="showSection('cart')">السلة 🛒 <span id="cartCount">0</span></button>
+<button class="secondary" onclick="showSection('contact')">اتصل بنا</button>
+</nav>
 
-<section class="login-panel" id="loginPanel" hidden>
-<h2>🔐 دخول ZADX ADMIN</h2>
-<form id="loginForm">
-<label>البريد الإلكتروني</label>
-<input type="email" id="email" required autocomplete="username">
-<label>كلمة المرور</label>
-<input type="password" id="password" required autocomplete="current-password">
-<button class="btn" type="submit">تسجيل الدخول</button>
-</form>
-<p class="status" id="loginStatus"></p>
-</section>
+<main class="container">
 
-<section class="admin-panel" id="adminPanel" hidden>
-<h2>⚙️ لوحة تحكم ZADX ADMIN</h2>
-<section id="statsPanel">
-<h3 style="color:#e5b84c">📊 إحصائيات المتجر الخاصة</h3>
-<div class="stats-grid">
-<div class="stat-card"><p>👁️ الزوار المسجلون</p><h2 id="visitorCount">0</h2></div>
-<div class="stat-card"><p>🛒 إجمالي الطلبات</p><h2 id="orderCount">0</h2></div>
-<div class="stat-card"><p>💰 المشتريات المؤكدة</p><h2 id="confirmedCount">0</h2></div>
-<div class="stat-card"><p>⏳ الطلبات المعلقة</p><h2 id="pendingCount">0</h2></div>
+<section id="home">
+<div class="hero">
+<h1>مرحبا بك في <span style="color:#e6bd64">ZADX STORE</span></h1>
+<p>اكتشف خدماتنا الرقمية وبوتاتنا واطلب خدمتك بسهولة وأمان.</p>
 </div>
-<button class="btn secondary" type="button" id="refreshStats">🔄 تحديث الإحصائيات</button>
-<h3 style="color:#e5b84c">📦 الطلبات الواردة</h3>
-<div id="ordersList"><p class="empty">جاري تحميل الطلبات...</p></div>
-<p class="status" id="statsStatus"></p>
-</section>
-<hr style="border-color:#49391f;margin:25px 0">
-<h3 style="color:#e5b84c">إدارة المنتجات</h3>
-<form id="productForm">
-<label>اسم المنتج</label><input id="pName" required placeholder="اسم المنتج">
-<label>وصف المنتج</label><textarea id="pDescription" required placeholder="وصف المنتج"></textarea>
-<label>السعر</label><input id="pPrice" required placeholder="مثلاً: حسب الطلب">
-<label>الأيقونة</label><input id="pIcon" required placeholder="🤖">
-<div class="admin-actions">
-<button class="btn" type="submit" id="saveButton">إضافة المنتج</button>
-<button class="btn secondary" type="button" id="cancelEdit" hidden>إلغاء التعديل</button>
+
+<div class="status" id="connection">جاري الاتصال بقاعدة البيانات...</div>
+
+<h2>منتجاتنا وخدماتنا</h2>
+<div class="products" id="products">
+<p>جاري تحميل المنتجات...</p>
 </div>
-</form>
-<p class="status" id="adminStatus"></p>
-<button class="btn danger" id="logoutButton" type="button">تسجيل الخروج</button>
 </section>
 
-<section class="section" id="products">
-<h2>⭐ خدماتنا الرقمية</h2>
-<div class="products" id="productList"><p class="empty">جاري تحميل المنتجات...</p></div>
-<p class="status" id="connectionStatus">جاري الاتصال بقاعدة البيانات...</p>
+<section id="cart" hidden>
+<h2>🛒 سلة المشتريات</h2>
+<div class="panel">
+<div id="cartItems">السلة فارغة حاليا.</div>
+<h3 id="total">المجموع: 0 DA</h3>
+<button class="btn" onclick="showSection('checkout')">إكمال الطلب</button>
+<button class="btn dark" onclick="showSection('home')">متابعة التسوق</button>
+</div>
 </section>
 
-<section class="cartbox">
-<h2>🛒 سلة الطلبات</h2>
-<div id="cartItems"><p class="empty">السلة فارغة حالياً</p></div>
-<button class="btn" id="sendOrder">إرسال الطلب إلى المتجر</button>
+<section id="checkout" hidden>
+<h2>إتمام الطلب</h2>
+<div class="panel">
+<input id="customer" placeholder="اسمك الكامل">
+<input id="phone" placeholder="رقم هاتفك">
+<textarea id="note" placeholder="ملاحظات إضافية (اختياري)"></textarea>
+<h3>طريقة الدفع</h3>
+<select id="payment">
+<option>CCP / BaridiMob</option>
+<option>USDT</option>
+<option>Visa</option>
+</select>
+<div class="status">
+رقم الحساب CCP / BaridiMob:<br>
+<strong style="color:#e6bd64">00799999004313678088</strong>
+</div>
+<p class="small">يتم تأكيد الطلب والدفع يدوياً عبر الدعم.</p>
+<button class="btn" onclick="sendOrder()">إرسال الطلب عبر Telegram</button>
+<button class="btn dark" onclick="showSection('cart')">رجوع للسلة</button>
+</div>
 </section>
+
+<section id="contact" hidden>
+<h2>الدعم والمساعدة</h2>
+<div class="panel">
+<p>للاستفسارات ومتابعة الطلبات تواصل معنا:</p>
+<a href="https://t.me/ZADX_PRO" style="color:#e6bd64">@ZADX_PRO</a>
+</div>
+</section>
+
+</main>
 
 <footer>
-<p>© 2026 ZADX STORE</p>
-<p>جميع الحقوق محفوظة</p>
-<a class="btn" href="https://t.me/ZADX_PRO">تواصل معنا</a>
+ZADX STORE © 2026
+<br><br>
+All rights reserved.
 </footer>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL="https://iyxxesftwprdrbxspdfb.supabase.co";
 const SUPABASE_KEY="sb_publishable_WZzeDVClbmDoLDD64EGdnQ_CRRhdL88";
+
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let products=[];
 let cart=[];
-let isAdmin=false;
-let editingId=null;
-const $=id=>document.getElementById(id);
 
-function setStatus(id,message){$(id).textContent=message}
-function createElement(tag,text,className){
-  const el=document.createElement(tag);
-  if(text!==undefined)el.textContent=text;
-  if(className)el.className=className;
-  return el;
+function showSection(id){
+document.querySelectorAll("main section").forEach(s=>s.hidden=true);
+document.getElementById(id).hidden=false;
+if(id==="cart")renderCart();
+window.scrollTo(0,0);
 }
 
-function getVisitorId(){
-  let id;
-  try{
-    id=localStorage.getItem("zadx_visitor_id");
-    if(!id){
-      id=crypto.randomUUID();
-      localStorage.setItem("zadx_visitor_id",id);
-    }
-  }catch(error){id=crypto.randomUUID()}
-  return id;
-}
-
-async function recordVisit(){
-  try{
-    const {error}=await db.from("store_visits").insert({id:getVisitorId()});
-    if(error&&error.code!=="23505")console.error("Visit error:",error);
-  }catch(error){console.error("Visit error:",error)}
+function safe(value){
+return String(value??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
 }
 
 async function loadProducts(){
-  try{
-    const {data,error}=await db.from("products")
-      .select("id,name,description,price,icon").order("id",{ascending:true});
-    if(error)throw error;
-    products=(data||[]).map(p=>({
-      id:p.id,name:p.name||"منتج",desc:p.description||"",
-      price:p.price??"حسب الطلب",icon:p.icon||"⭐"
-    }));
-    setStatus("connectionStatus","متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+products.length);
-    showProducts();
-  }catch(error){
-    setStatus("connectionStatus","خطأ: "+error.message);
-    console.error(error);
-  }
+const status=document.getElementById("connection");
+try{
+const {data,error}=await db
+.from("products")
+.select("id,name,description,price,icon")
+.limit(4);
+
+if(error)throw error;
+
+products=data||[];
+status.textContent="متصل بقاعدة البيانات بنجاح ✓ | عدد المنتجات: "+products.length;
+
+const box=document.getElementById("products");
+
+if(!products.length){
+box.innerHTML="<p>لا توجد منتجات حاليا.</p>";
+return;
 }
 
-function showProducts(){
-  const list=$("productList");
-  list.replaceChildren();
-  products.forEach((p,i)=>{
-    const card=createElement("div",undefined,"product");
-    card.appendChild(createElement("div",p.icon,"symbol"));
-    card.appendChild(createElement("h3",p.name));
-    card.appendChild(createElement("p",p.desc));
-    card.appendChild(createElement("div",String(p.price),"price"));
-    const add=createElement("button","إضافة إلى السلة");
-    add.addEventListener("click",()=>addToCart(i));
-    card.appendChild(add);
-    if(isAdmin){
-      const edit=createElement("button","✏️ تعديل المنتج","edit-btn");
-      edit.addEventListener("click",()=>editProduct(p.id));
-      card.appendChild(edit);
-      const del=createElement("button","🗑️ حذف المنتج","delete-btn");
-      del.addEventListener("click",()=>deleteProduct(p.id));
-      card.appendChild(del);
-    }
-    list.appendChild(card);
-  });
-  if(!products.length)list.appendChild(createElement("p","لا توجد منتجات حالياً","empty"));
+box.innerHTML=products.map(p=>`
+<div class="product">
+<div class="emoji">${safe(p.icon||"⭐")}</div>
+<h3>${safe(p.name)}</h3>
+<p>${safe(p.description||"خدمة رقمية مميزة من ZADX STORE")}</p>
+<div class="price">${safe(p.price)} DA</div>
+<button class="btn" onclick="addToCart('${safe(p.id)}')">أضف إلى السلة</button>
+</div>
+`).join("");
+
+}catch(error){
+status.textContent="خطأ الاتصال: "+error.message;
+document.getElementById("products").innerHTML=
+"<p>تعذر تحميل المنتجات. تحقق من صلاحيات قاعدة البيانات.</p>";
+}
 }
 
-async function checkAdmin(){
-  const {data:{session}}=await db.auth.getSession();
-  if(!session){isAdmin=false;updateAdminUI();return}
-  const {data,error}=await db.rpc("is_store_admin");
-  isAdmin=!error&&data===true;
-  updateAdminUI();
-  if(isAdmin){
-    setStatus("adminStatus","تم تسجيل الدخول كأدمن ✓");
-    await loadStats();
-  }else setStatus("loginStatus","هذا الحساب ليس لديه صلاحية الإدارة.");
+function addToCart(id){
+const product=products.find(p=>String(p.id)===String(id));
+if(!product)return;
+
+const found=cart.find(x=>String(x.id)===String(id));
+if(found)found.quantity++;
+else cart.push({...product,quantity:1});
+
+updateCount();
+alert("تمت إضافة المنتج إلى السلة ✓");
 }
 
-function updateAdminUI(){
-  $("adminPanel").hidden=!isAdmin;
-  $("loginPanel").hidden=true;
-  showProducts();
+function updateCount(){
+document.getElementById("cartCount").textContent=
+cart.reduce((sum,p)=>sum+p.quantity,0);
 }
 
-$("adminToggle").addEventListener("click",()=>{
-  if(isAdmin){
-    $("adminPanel").hidden=!$("adminPanel").hidden;
-    if(!$("adminPanel").hidden)loadStats();
-  }else $("loginPanel").hidden=!$("loginPanel").hidden;
+function renderCart(){
+const box=document.getElementById("cartItems");
+
+if(!cart.length){
+box.innerHTML="السلة فارغة حاليا.";
+document.getElementById("total").textContent="المجموع: 0 DA";
+return;
+}
+
+box.innerHTML=cart.map((p,i)=>`
+<div class="cart-item">
+<div>
+<strong>${safe(p.name)}</strong>
+<div class="small">${safe(p.price)} DA × ${p.quantity}</div>
+</div>
+<div>
+<button onclick="changeQty(${i},1)">+</button>
+<button onclick="changeQty(${i},-1)">−</button>
+</div>
+</div>
+`).join("");
+
+const total=cart.reduce((s,p)=>s+Number(p.price)*p.quantity,0);
+document.getElementById("total").textContent="المجموع: "+total+" DA";
+}
+
+function changeQty(index,amount){
+cart[index].quantity+=amount;
+if(cart[index].quantity<=0)cart.splice(index,1);
+updateCount();
+renderCart();
+}
+
+function sendOrder(){
+if(!cart.length){
+alert("السلة فارغة!");
+return;
+}
+
+const name=document.getElementById("customer").value.trim();
+const phone=document.getElementById("phone").value.trim();
+
+if(!name||!phone){
+alert("أدخل اسمك ورقم هاتفك.");
+return;
+}
+
+const total=cart.reduce((s,p)=>s+Number(p.price)*p.quantity,0);
+
+let message="طلب جديد - ZADX STORE\n";
+message+="الاسم: "+name+"\n";
+message+="الهاتف: "+phone+"\n";
+message+="الدفع: "+document.getElementById("payment").value+"\n";
+message+="المنتجات:\n";
+
+cart.forEach(p=>{
+message+=p.name+" × "+p.quantity+" = "+(Number(p.price)*p.quantity)+" DA\n";
 });
 
-$("loginForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  setStatus("loginStatus","جاري تسجيل الدخول...");
-  const {error}=await db.auth.signInWithPassword({
-    email:$("email").value.trim(),password:$("password").value
-  });
-  if(error){setStatus("loginStatus","خطأ في الدخول: "+error.message);return}
-  await checkAdmin();
-  if(isAdmin)setStatus("adminStatus","أهلاً بك في لوحة ZADX ADMIN ✓");
-  else await db.auth.signOut();
-});
+message+="المجموع: "+total+" DA\n";
+message+="ملاحظات: "+document.getElementById("note").value;
 
-$("logoutButton").addEventListener("click",async()=>{
-  await db.auth.signOut();
-  isAdmin=false;
-  resetForm();
-  updateAdminUI();
-  setStatus("loginStatus","تم تسجيل الخروج.");
-});
-
-async function loadStats(){
-  if(!isAdmin)return;
-  setStatus("statsStatus","جاري تحميل الإحصائيات...");
-  try{
-    const [visitsResult,ordersResult]=await Promise.all([
-      db.from("store_visits").select("id",{count:"exact",head:true}),
-      db.from("store_orders").select("id,items,status,created_at").order("created_at",{ascending:false})
-    ]);
-    if(visitsResult.error)throw visitsResult.error;
-    if(ordersResult.error)throw ordersResult.error;
-    const visits=visitsResult.count||0;
-    const orders=ordersResult.data||[];
-    $("visitorCount").textContent=visits;
-    $("orderCount").textContent=orders.length;
-    $("confirmedCount").textContent=orders.filter(o=>o.status==="confirmed").length;
-    $("pendingCount").textContent=orders.filter(o=>o.status==="pending").length;
-    showOrders(orders);
-    setStatus("statsStatus","تم تحديث الإحصائيات بنجاح ✓");
-  }catch(error){
-    setStatus("statsStatus","خطأ في تحميل الإحصائيات: "+error.message);
-    console.error(error);
-  }
+window.open("https://t.me/ZADX_PRO?text="+encodeURIComponent(message),"_blank");
 }
 
-function showOrders(orders){
-  const list=$("ordersList");
-  list.replaceChildren();
-  if(!orders.length){
-    list.appendChild(createElement("p","لا توجد طلبات حتى الآن.","empty"));
-    return;
-  }
-  orders.forEach(order=>{
-    const card=createElement("div",undefined,"order-card");
-    card.appendChild(createElement("h3","طلب رقم: "+String(order.id).slice(0,8)));
-    card.appendChild(createElement("p",
-      order.status==="confirmed"?"الحالة: تم تأكيد الشراء ✓":"الحالة: في انتظار التأكيد",
-      order.status==="confirmed"?"order-confirmed":"order-pending"));
-    card.appendChild(createElement("p","التاريخ: "+new Date(order.created_at).toLocaleString("ar-DZ")));
-    let items=order.items||[];
-    if(typeof items==="string"){try{items=JSON.parse(items)}catch(e){items=[]}}
-    card.appendChild(createElement("p","المنتجات المطلوبة:"));
-    if(Array.isArray(items)){
-      items.forEach(item=>{
-        card.appendChild(createElement("p",
-          "• "+String(item.name||"منتج")+" — "+String(item.price||"حسب الطلب")+
-          (item.quantity>1?" × "+item.quantity:"")));
-      });
-    }
-    if(order.status==="pending"){
-      const actions=createElement("div",undefined,"order-actions");
-      const confirmBtn=createElement("button","✓ تأكيد الشراء","confirm-btn");
-      confirmBtn.addEventListener("click",()=>confirmOrder(order.id));
-      actions.appendChild(confirmBtn);
-      card.appendChild(actions);
-    }
-    list.appendChild(card);
-  });
-}
-
-async function confirmOrder(id){
-  if(!isAdmin)return;
-  if(!confirm("هل تؤكد أن عملية الشراء تمت فعلاً؟"))return;
-  const {error}=await db.from("store_orders").update({status:"confirmed"}).eq("id",id);
-  if(error){setStatus("statsStatus","خطأ: "+error.message);return}
-  setStatus("statsStatus","تم تأكيد الشراء بنجاح ✓");
-  await loadStats();
-}
-
-$("refreshStats").addEventListener("click",loadStats);
-
-$("productForm").addEventListener("submit",async e=>{
-  e.preventDefault();
-  if(!isAdmin){alert("غير مسموح");return}
-  const product={
-    name:$("pName").value.trim(),
-    description:$("pDescription").value.trim(),
-    price:$("pPrice").value.trim(),
-    icon:$("pIcon").value.trim()
-  };
-  let result;
-  if(editingId!==null)result=await db.from("products").update(product).eq("id",editingId);
-  else{
-    product.id=crypto.randomUUID();
-    result=await db.from("products").insert([product]);
-  }
-  if(result.error){setStatus("adminStatus","خطأ: "+result.error.message);return}
-  setStatus("adminStatus",editingId!==null?"تم تعديل المنتج بنجاح ✓":"تمت إضافة المنتج بنجاح ✓");
-  resetForm();
-  await loadProducts();
-});
-
-function editProduct(id){
-  const p=products.find(x=>x.id===id);
-  if(!p)return;
-  editingId=id;
-  $("pName").value=p.name;
-  $("pDescription").value=p.desc;
-  $("pPrice").value=p.price;
-  $("pIcon").value=p.icon;
-  $("saveButton").textContent="حفظ التعديلات";
-  $("cancelEdit").hidden=false;
-  $("adminPanel").hidden=false;
-  window.scrollTo({top:0,behavior:"smooth"});
-}
-
-function resetForm(){
-  editingId=null;
-  $("productForm").reset();
-  $("saveButton").textContent="إضافة المنتج";
-  $("cancelEdit").hidden=true;
-}
-$("cancelEdit").addEventListener("click",resetForm);
-
-async function deleteProduct(id){
-  if(!isAdmin)return;
-  if(!confirm("هل أنت متأكد من حذف هذا المنتج؟"))return;
-  const {error}=await db.from("products").delete().eq("id",id);
-  if(error){setStatus("adminStatus","خطأ في الحذف: "+error.message);return}
-  setStatus("adminStatus","تم حذف المنتج بنجاح ✓");
-  await loadProducts();
-}
-
-function addToCart(i){cart.push(products[i]);showCart()}
-
-function showCart(){
-  $("count").textContent=cart.length;
-  const box=$("cartItems");
-  box.replaceChildren();
-  if(!cart.length){
-    box.appendChild(createElement("p","السلة فارغة حالياً","empty"));
-    return;
-  }
-  cart.forEach((p,i)=>{
-    const item=createElement("div",undefined,"cart-item");
-    item.appendChild(createElement("span",p.icon+" "+p.name+" — "+p.price));
-    const remove=createElement("button","حذف","remove");
-    remove.addEventListener("click",()=>{cart.splice(i,1);showCart()});
-    item.appendChild(remove);
-    box.appendChild(item);
-  });
-}
-
-/*
-  الطلب يُسجّل أولاً في store_orders ثم يُرسل إلى Edge Function.
-  لا تضع Telegram Bot Token في هذا الملف؛ يبقى داخل Supabase Secrets.
-*/
-$("sendOrder").addEventListener("click",async()=>{
-  if(!cart.length){alert("أضف خدمة إلى السلة أولاً");return}
-
-  const button=$("sendOrder");
-  if(button.disabled)return;
-  button.disabled=true;
-  button.textContent="جاري إرسال الطلب...";
-
-  const orderItems=cart.map(p=>({
-    name:String(p.name),
-    price:String(p.price),
-    quantity:1
-  }));
-
-  try{
-    const {error:dbError}=await db.from("store_orders").insert({
-      id:crypto.randomUUID(),
-      items:orderItems,
-      status:"pending"
-    });
-    if(dbError)throw new Error("تعذر تسجيل الطلب: "+dbError.message);
-
-    const {data,error}=await db.functions.invoke("send-telegram-order",{
-      body:{items:orderItems}
-    });
-
-    if(error||!data||data.success!==true){
-      console.error("Telegram delivery error:",error||data);
-      cart=[];
-      showCart();
-      alert("تم تسجيل الطلب، لكن تعذر إرساله إلى Telegram. تواصل معنا من رابط المتجر.");
-      return;
-    }
-
-    cart=[];
-    showCart();
-    alert("تم إرسال طلبك بنجاح إلى ZADX STORE ✓");
-  }catch(error){
-    console.error("Order error:",error);
-    alert(error.message||"حدث خطأ أثناء إرسال الطلب.");
-  }finally{
-    button.disabled=false;
-    button.textContent="إرسال الطلب إلى المتجر";
-  }
-});
-
-showCart();
-recordVisit();
 loadProducts();
-checkAdmin();
 </script>
 </body>
 </html>
